@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd
+		http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+		http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.9.xsd">
+
+	<changeSet author="rubendr"
+		id="insert-init-values-status-table">
+		<insert tableName="tbl_status">
+			<column name="id" value='1' />
+			<column name="status" value='ENVIADO' />
+		</insert>
+		<insert tableName="tbl_status">
+			<column name="id" value='2' />
+			<column name="status" value='BORRADOR' />
+		</insert>
+		<insert tableName="tbl_status">
+			<column name="id" value='3' />
+			<column name="status" value='ELIMINADO' />
+		</insert>
+		<insert tableName="tbl_status">
+			<column name="id" value='4' />
+			<column name="status" value='SPAM' />
+		</insert>
+	</changeSet>
+
+	<changeSet author="rubendr"
+		id="insert-init-values-address-table">
+		<insert tableName="tbl_address">
+			<column name="id" value='1' />
+			<column name="address" value='a@domain.com' />
+		</insert>
+		<insert tableName="tbl_address">
+			<column name="id" value='2' />
+			<column name="address" value='b@domain.com' />
+		</insert>
+		<insert tableName="tbl_address">
+			<column name="id" value='3' />
+			<column name="address" value='c@domain.com' />
+		</insert>
+		<insert tableName="tbl_address">
+			<column name="id" value='4' />
+			<column name="address" value='d@domain.com' />
+		</insert>
+
+	</changeSet>
+
+
+	<changeSet author="rubendr"
+		id="insert-init-values-email-table">
+		<insert tableName="tbl_message">
+			<column name="id" value='99' />
+			<column name="email_body" value='Hello world99' />
+			<column name="email_from" value='b@domain.com' />
+			<column name="email_to" value='a@domain.com' />
+			<column name="email_cc" value='c@domain.com' />
+			<column name="create_at" value='2012-09-17' />
+			<column name="update_at" value='null' />
+		</insert>
+		<insert tableName="tbl_message">
+			<column name="id" value='100' />
+			<column name="email_body" value='Hello world1' />
+			<column name="email_from" value='a@domain.com' />
+			<column name="email_to" value='b@domain.com' />
+			<column name="email_cc" value='c@domain.com' />
+			<column name="create_at" value='2022-09-17' />
+			<column name="update_at" value='null' />			
+		</insert>
+	</changeSet>
+
+	<changeSet author="rubendr"
+		id="insert-init-values-email_out-box_table">
+		<insert tableName="tbl_out_box">
+			<column name="message_id" value='99' />
+			<column name="address_id" value='2' />
+			<column name="email_status" value='1' />
+		</insert>
+		<insert tableName="tbl_out_box">
+			<column name="message_id" value='100' />
+			<column name="address_id" value='1' />
+			<column name="email_status" value='1' />
+		</insert>
+		<insert tableName="tbl_in_box">
+			<column name="message_id" value='99' />
+			<column name="address_id" value='1' />
+			<column name="address_type" value='1' />
+			<column name="email_status" value='1' />
+		</insert>
+		<insert tableName="tbl_in_box">
+			<column name="message_id" value='99' />
+			<column name="address_id" value='3' />
+			<column name="address_type" value='2' />
+			<column name="email_status" value='1' />
+		</insert>
+		<insert tableName="tbl_in_box">
+			<column name="message_id" value='100' />
+			<column name="address_id" value='2' />
+			<column name="address_type" value='1' />
+			<column name="email_status" value='1' />
+		</insert>
+		<insert tableName="tbl_in_box">
+			<column name="message_id" value='100' />
+			<column name="address_id" value='3' />
+			<column name="address_type" value='2' />
+			<column name="email_status" value='1' />
+		</insert>
+	</changeSet>
+
+
+</databaseChangeLog>

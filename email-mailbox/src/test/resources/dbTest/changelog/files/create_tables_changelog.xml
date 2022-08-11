@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd
+		http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+		http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.9.xsd">
+
+
+	<changeSet author="rubendr" id="dropTable-tbl_email">
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="tbl_message" />
+		</preConditions>
+		<dropTable cascadeConstraints="true" tableName="tbl_message" />
+	</changeSet>
+
+
+	<changeSet author="rubendr" id="createtable-tbl_status">
+
+		<createTable tableName="tbl_status">
+			<column name="id" type="serial">
+				<constraints primaryKey="true" />
+			</column>
+
+			<column name="status" type="varchar" />
+
+		</createTable>
+	</changeSet>
+
+	<changeSet author="rubendr" id="createtable-tbl_address">
+
+		<createTable tableName="tbl_address">
+			<column name="id" type="serial">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="address" type="varchar" />
+		</createTable>
+	</changeSet>
+
+
+	<changeSet author="rubendr" id="createtable-tbl_message">
+
+		<createTable tableName="tbl_message">
+			<column name="id" type="serial">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="email_from" type="varchar" />
+			<column name="email_to" type="varchar" />
+			<column name="email_cc" type="varchar" />
+			<column name="email_body" type="varchar" />
+			<column name="create_at" type="date" />
+			<column name="update_at" type="date" />
+			
+		</createTable>
+	</changeSet>
+
+
+	<changeSet author="rubendr" id="createtable-tbl_out_box">
+
+		<createTable tableName="tbl_out_box">
+			<column name="message_id" type="bigint">
+				<constraints primaryKey="true" foreignKeyName="fk_message_out_box" references="tbl_message(id)" />
+			</column>
+			<column name="address_id" type="bigint">
+				<constraints foreignKeyName="fk_address_out_box" references="tbl_address(id)" />
+			</column>
+			<column name="email_status" type="int" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="rubendr" id="createtable-tbl_in_box">
+		<createTable tableName="tbl_in_box">
+			<column name="message_id" type="bigint">
+				<constraints primaryKey="true" foreignKeyName="fk_message_in_box" references="tbl_message(id)" />
+			</column>
+			<column name="address_id" type="bigint">
+				<constraints primaryKey="true" foreignKeyName="fk_address_in_box" references="tbl_address(id)" />
+			</column>
+			<column name="address_type" type="int" />
+
+			<column name="email_status" type="int" />
+		</createTable>
+	</changeSet>
+
+</databaseChangeLog>
