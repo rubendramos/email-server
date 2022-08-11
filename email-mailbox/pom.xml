@@ -8,10 +8,10 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>emailaddress-service</artifactId>
+	<artifactId>email-emailBox</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>emailaddress-service</name>
-	<description>Email address service</description>
+	<name>email-emailBox</name>
+	<description>Email emailBox service</description>
 	<properties>
 		<java.version>1.8</java.version>
 		<spring-cloud.version>2021.0.3</spring-cloud.version>
@@ -31,7 +31,21 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-feign -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-config-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-feign</artifactId>
