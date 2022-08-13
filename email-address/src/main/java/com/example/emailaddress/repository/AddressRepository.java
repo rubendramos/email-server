@@ -9,14 +9,14 @@ import com.example.emailaddress.entity.Address;
 public interface AddressRepository extends JpaRepository<Address, Long>{
 
 	/**
-	 * Retrieves adrress entity from string address
+	 * Retrieves adrress entity from by address
 	 * @param addrress
 	 * @return
 	 */
 	public Address findByAddress(String addrress);
 	
 	/**
-	 *  Retrieves adrress entity from id 
+	 *  Retrieves adrress entity by id 
 	 */
 	public Optional<Address>  findById(Long id);
 }

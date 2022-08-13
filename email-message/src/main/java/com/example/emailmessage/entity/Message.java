@@ -3,7 +3,6 @@ package com.example.emailmessage.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,15 +31,6 @@ public class Message implements Serializable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-    
-//	@OneToOne
-//	@JoinColumn(name="message_id")
-//	@PrimaryKeyJoinColumn
-//	private OutBox outBox;
-//    
-//	
-//	@OneToMany(mappedBy = "message")
-//	private Set<InBox> recipients;	
 	
 	@Column(name = "email_from")
 	private String emailFrom;	
@@ -62,31 +52,4 @@ public class Message implements Serializable{
 	@Column(name = "update_at")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date updateAt;
-	
-
-//	  /**
-//     * Add an Address Set to TO,CC or BCC List depends on AddressTypeEnum
-//     * @param addressSet
-//     * @param addressTypeEnum
-//     */
-//    public void addEmailAddres(Set<Address> addressSet, AddressTypeEnum addressTypeEnum, StatusEnum status) {
-//    	addressSet.forEach(address -> this.addEmailAddressToRecipients(address,addressTypeEnum, status));
-//    }
-//    
-//    /**
-//     * Add an address to TO,CC or BCC List depends on AddressTypeEnum
-//     * @param address
-//     */
-//    public void addEmailAddressToRecipients(Address address, AddressTypeEnum addressTypeEnum, StatusEnum status) {
-//    	InBox emailAddress = new InBox(this, address, addressTypeEnum, status);
-//    	recipients.add(emailAddress);
-////    	address.getEmailAddress().add(emailAddress);
-//    }
-//    
-//    public void addSenderToOutBox(Address address,StatusEnum status) {
-//    	OutBox outbox = new OutBox(this, address, status);
-//    	this.outBox = outbox;
-//    	
-//    }
-     
 }

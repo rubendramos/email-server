@@ -21,6 +21,12 @@ public class EMailController {
 	@Autowired
 	private AddressService addressService;
 
+	
+	/**
+	 * Retrieves a {@link Address} object by id
+	 * @param addressId
+	 * @return
+	 */
 	@GetMapping(value = "/addressId/{addressId}")
 	public ResponseEntity<Address> getAddressById(@PathVariable("addressId") Long addressId) {
 		Address address = addressService.getAddresById(addressId);
@@ -31,6 +37,11 @@ public class EMailController {
 	}
 	
 	
+	/**
+	 * Retrieves a {@link Address} by string email  address
+	 * @param emailAddress
+	 * @return
+	 */
 	@GetMapping(value = "/{emailAddress}")
 	public ResponseEntity<Address> getAddressByEmailAddress(@PathVariable("emailAddress") String emailAddress) {
 		Address address = addressService.getAddresFromAddresString(emailAddress);

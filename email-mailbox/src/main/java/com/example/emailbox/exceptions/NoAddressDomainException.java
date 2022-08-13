@@ -4,7 +4,7 @@ public class NoAddressDomainException extends MailServiceException{
 
 
 	private static final long serialVersionUID = 1L;
-	private static final String MESSAGE_EXCEPTION = "The email adrress not belongs to de current domain";
+	private static final String MESSAGE_EXCEPTION = "Email adrress not belongs to current domain";
 
 	public NoAddressDomainException(Exception exception, Object[] paramsException) {
 		super(exception, paramsException);

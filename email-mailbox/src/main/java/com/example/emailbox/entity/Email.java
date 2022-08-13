@@ -1,7 +1,9 @@
 package com.example.emailbox.entity;
 
 
-
+/**
+ * Interfaz that represents sendeable messages
+ */
 import com.example.emailbox.modelo.Address;
 import com.example.emailbox.modelo.Message;
 import com.example.emailbox.modelo.enums.StatusEnum;

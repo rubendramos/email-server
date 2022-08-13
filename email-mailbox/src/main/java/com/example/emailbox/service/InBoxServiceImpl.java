@@ -31,6 +31,11 @@ import com.example.emailbox.utils.EmailServerUtils;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @author rdr
+ * @Since 13 ago 2022
+ * @Version 1.0
+ */
 @Service
 @RequiredArgsConstructor
 public class InBoxServiceImpl implements InBoxService {
@@ -46,8 +51,10 @@ public class InBoxServiceImpl implements InBoxService {
 	private final InBoxRepository inBoxRepository;
 	private final OutBoxRepository outBoxRepository;
 	
-
-
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.InBoxService#listEmailsFromAddresAndStatus(java.lang.String, com.example.emailbox.modelo.enums.StatusEnum)
+	 */
 	@Override	
 	public Set<Email> listEmailsFromAddresAndStatus(String stringAddress, StatusEnum status)
 			throws MailServiceException {
@@ -62,7 +69,10 @@ public class InBoxServiceImpl implements InBoxService {
 	}
 	
 
-
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.InBoxService#listEmailsFromAddres(java.lang.String)
+	 */
 	@Override
 	public Set<Email> listEmailsFromAddres(String stringAddress) throws MailServiceException {
 		Set<Email> inBoxList = null;
@@ -75,6 +85,10 @@ public class InBoxServiceImpl implements InBoxService {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.InBoxService#sendMail(java.lang.Long)
+	 */
 	@Override
 	public Email sendMail(Long mailId) throws MailServiceException, EmailStatusException {
 		OutBox outBoxMail = null;
@@ -127,6 +141,10 @@ public class InBoxServiceImpl implements InBoxService {
 	}
 
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.InBoxService#deleteInBox(java.lang.Long, java.lang.Long)
+	 */
 	@Override
 	public InBox deleteInBox(Long id, Long address) {
 		InBox ematilToDeleted = null;
@@ -159,14 +177,12 @@ public class InBoxServiceImpl implements InBoxService {
 		return deletedMails;
 	}
 	
-	
-	/**
-	 * Marca como spam todo los mails enviados desde una dirección 
-	 * @param mailsIds
-	 * @return
-	 * @throws MailServiceException
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.InBoxService#setInBoxMailsAsSpam(java.lang.String)
 	 */
 	@Transactional
+	@Override
 	public Set<Email> setInBoxMailsAsSpam(String stringAddress) throws MailServiceException{
 		Set<Email> inBoxList = null; 
 		
@@ -189,14 +205,11 @@ public class InBoxServiceImpl implements InBoxService {
 		return inBoxList;
 	}	
 	
-	/**
-	 * Update status from inBox email
-	 * @param mailId
-	 * @param addressId
-	 * @param status
-	 * @return
-	 * @throws MailServiceException
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.InBoxService#updateMailStatus(java.lang.Long, java.lang.Long, com.example.emailbox.modelo.enums.StatusEnum)
 	 */
+	@Override
 	public Email updateMailStatus(Long mailId, Long addressId , StatusEnum status) throws MailServiceException{
 		InBox ematilToUpdate = null;
 		EmailAddressKey eak = new EmailAddressKey();
@@ -215,10 +228,11 @@ public class InBoxServiceImpl implements InBoxService {
 		return ematilToUpdate;
 	}
 
+
 	
 	
 	/**
-	 * Add Message and Addres to Inbox email List
+	 * Add Message and Address to Inbox {@link Email} {@link Set}
 	 * @param inBoxList
 	 * @param address
 	 */
@@ -238,6 +252,11 @@ public class InBoxServiceImpl implements InBoxService {
 	}
 	
 	
+	/**
+	 * Add to a set all valid Addess
+	 * @param stringAddressSet
+	 * @return
+	 */
 	private Set<Address> validateAddressSet(Set<String> stringAddressSet) {
 		Set<Address> validAddress = new HashSet<>();
 		stringAddressSet.forEach(stringAddress -> {
@@ -252,7 +271,7 @@ public class InBoxServiceImpl implements InBoxService {
 
 	
 	/**
-	 * Generates a Inbox email from Address
+	 * Generates a {@link InBox} {@link Email} from {@link Address},  {@link Message} and {@link AddressTypeEnum}
 	 * @param mail
 	 * @param addressSet
 	 * @param addressTypeEnum
@@ -269,10 +288,9 @@ public class InBoxServiceImpl implements InBoxService {
 		}
 		return recipients;
 	}
-
 	
 	/**
-	 * Retrieves {@link Address} a string address if not exsit retrieves null
+	 * Retrieves {@link Address} by a string email address. If not exits return null.
 	 * @param stringAddress
 	 * @return
 	 * @throws MailServiceException

@@ -6,65 +6,67 @@ import com.example.emailbox.entity.Email;
 import com.example.emailbox.entity.InBox;
 import com.example.emailbox.exceptions.EmailStatusException;
 import com.example.emailbox.exceptions.MailServiceException;
+import com.example.emailbox.modelo.Address;
 import com.example.emailbox.modelo.enums.StatusEnum;
 
 public interface InBoxService {
 
 	
 	/**
-	 * Retrieves a list o emails by address and {@link StatusEnum}
+	 * Retrieves an {@link Email} {@link Set} by string email address and {@link StatusEnum}
 	 * @return
 	 */
 	public Set<Email> listEmailsFromAddresAndStatus(String addresParam, StatusEnum status) throws MailServiceException;
 	
 	/**
-	 * Retrieves a Set of emilas by address
+	 * Retrieves a {@link Email} {@link Set} by string email address
 	 * @return
 	 */
-	public Set<Email> listEmailsFromAddres(String addresParam) throws MailServiceException;
+	public Set<Email> listEmailsFromAddres(String addressParam) throws MailServiceException;
 	
 	
 	/**
-	 * Sends a mail
+	 * Send a {@link Email} by messageId
 	 * @param mailId
 	 * @return
 	 * @throws MailServiceException
 	 * @throws EmailStatusException
 	 */
-	public Email sendMail(Long mailId) throws MailServiceException,EmailStatusException;
+	public Email sendMail(Long messageId) throws MailServiceException,EmailStatusException;
 	
 	/**
-	 * Delete a mail in InBox by id and addressId
-	 * @param id
+	 * Delete an {@link Email} {@link InBox} by messageId and addressId
+	 * @param messageId
 	 * @param address
 	 * @return
 	 * @throws MailServiceException
 	 */
-	public InBox deleteInBox(Long id,Long address) throws MailServiceException;
+	public InBox deleteInBox(Long messageId,Long address) throws MailServiceException;
 	
-
 	/**
-	 * Delete a set of mails by   id's and address
-	 * @param mailsIds
+	 * Delete an {@link Email} {@link Set}   by messageId and addressId
+	 * @param messageId
+	 * @param addressId
 	 * @return
 	 * @throws MailServiceException
 	 */
-	public Set<Email> deleteInBox(Set<Long> mailsIds, Long address) throws MailServiceException;
+	public Set<Email> deleteInBox(Set<Long> messageId, Long addressId) throws MailServiceException;
 	
 	
 	/**
-	 * Updates mail status by mailId and addressId
-	 * @param mailsIds
+	 * Updates {@link Email}  status by messageId and addressId
+	 * @param messageId
+	 * @param addressId
 	 * @return
 	 * @throws MailServiceException
 	 */
-	public Email updateMailStatus(Long mailId, Long addressId , StatusEnum status) throws MailServiceException;
+	public Email updateMailStatus(Long messageId, Long addressId , StatusEnum status) throws MailServiceException;
 		
 	
 	
 	/**
-	 * Marca como spam todo los mails enviados desde una dirección 
-	 * @param mailsIds
+	 * Set as {@link StatusEnum} SPAN All {@link Email} sent from {@link Address}
+	 * @param addressParam
 	 * @return
 	 * @throws MailServiceException
 	 */

@@ -30,7 +30,7 @@ public class EmailMessageController {
 
 	
 	/**
-	 * Retrieves message by Id
+	 * Retrieves {@link Message} by Id
 	 * @param messageId
 	 * @return
 	 */
@@ -60,6 +60,12 @@ public class EmailMessageController {
 	}
 	
 	
+	/**
+	 * Persist  {@link Message}
+	 * @param message
+	 * @return
+	 * @throws EmailMessageServiceException
+	 */
 	@PostMapping
 	public ResponseEntity<Message> saveMessage(@RequestBody Message message)
 			throws EmailMessageServiceException {
@@ -78,7 +84,14 @@ public class EmailMessageController {
 
 		return ResponseEntity.ok(messaUpdated);
 	}
-	
+
+	/**
+	 * Updates {@link Message} by Id
+	 * @param messageId
+	 * @param message
+	 * @return
+	 * @throws EmailMessageServiceException
+	 */
 	@PutMapping(value = "update/{messageId}")
 	public ResponseEntity<Message> updateMessage(@PathVariable("messageId") Long messageId, @RequestBody Message message)
 			throws EmailMessageServiceException {

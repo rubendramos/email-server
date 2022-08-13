@@ -10,9 +10,19 @@ import com.example.emailbox.modelo.Address;
 @FeignClient(name ="email-address",path="/api/address")
 public interface AddressClient {
 	
+	/**
+	 * Get a {@link Address} by string email address
+	 * @param emailAddress
+	 * @return
+	 */
 	@GetMapping(value = "/{emailAddress}")
 	public ResponseEntity<Address> getAddressByEmailAddress(@PathVariable("emailAddress") String emailAddress);
 	
+	/**
+	 * Get a {@link Address} by Id
+	 * @param addressId
+	 * @return
+	 */
 	@GetMapping(value = "/addressId/{addressId}")
 	public ResponseEntity<Address> getAddressById(@PathVariable("addressId") Long addressId);
 

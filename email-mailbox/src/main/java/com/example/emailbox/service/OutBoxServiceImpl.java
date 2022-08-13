@@ -38,18 +38,20 @@ public class OutBoxServiceImpl implements OutBoxService {
 	@Autowired
 	MessageClient mesageClient;
 	
-	
-	
-	/**
-	 * Retrieves a outBox mail by Id
-	 * @return
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.OutBoxService#getOutBoxById(java.lang.Long)
 	 */
 	@Override
 	public Email getOutBoxById(Long mailId) {
 		return outBoxRepository.findById(mailId).get();
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.OutBoxService#listEmailsFromAddresAndStatus(java.lang.String, com.example.emailbox.modelo.enums.StatusEnum)
+	 */
 	@Override
 	public Set<Email> listEmailsFromAddresAndStatus(String stringAddress, StatusEnum status)
 			throws MailServiceException {
@@ -64,6 +66,11 @@ public class OutBoxServiceImpl implements OutBoxService {
 		return outBoxList;
 	}
 
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.OutBoxService#listEmailsFromAddres(java.lang.String)
+	 */
 	@Override
 	public Set<Email> listEmailsFromAddres(String stringAddress) throws MailServiceException {
 		Set<Email> outBoxList = null;
@@ -77,7 +84,10 @@ public class OutBoxServiceImpl implements OutBoxService {
 
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.OutBoxService#createOutBox(com.example.emailbox.entity.Email)
+	 */
 	@Override
 	public Email createOutBox(Email email) throws MailServiceException {
 		Email savedEmail = null;
@@ -94,13 +104,15 @@ public class OutBoxServiceImpl implements OutBoxService {
 		return  savedEmail;
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.OutBoxService#deleteOutBox(java.lang.Long)
+	 */
 	@Override
 	public Email deleteOutBox(Long id){
 		Email ematilToDeleted = null;
 		ematilToDeleted = outBoxRepository.getById(id);
 		if (null != ematilToDeleted && ematilToDeleted.getEmailStatusValue() != StatusEnum.ELIMINADO.getStatusId()) {
-			
 			ematilToDeleted.setEmailStatusValue(StatusEnum.ELIMINADO.getStatusId());
 			outBoxRepository.save((OutBox)ematilToDeleted);
 		} else {
@@ -110,7 +122,10 @@ public class OutBoxServiceImpl implements OutBoxService {
 		return ematilToDeleted;
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.OutBoxService#deleteOutBox(java.util.Set)
+	 */
 	@Override
 	public Set<Email> deleteOutBox(Set<Long> mailsIds) throws MailServiceException{
 		Set<Email> deletedMails = new HashSet<>();
@@ -125,13 +140,9 @@ public class OutBoxServiceImpl implements OutBoxService {
 		return deletedMails;
 	}
 	
-	/**
-	 * Update status from inBox email
-	 * @param mailId
-	 * @param addressId
-	 * @param status
-	 * @return
-	 * @throws MailServiceException
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.OutBoxService#updateMailStatus(java.lang.Long, com.example.emailbox.modelo.enums.StatusEnum)
 	 */
 	public Email updateMailStatus(Long mailId, StatusEnum status) throws MailServiceException{
 		OutBox emaiToBeUpdated = null;
@@ -149,36 +160,36 @@ public class OutBoxServiceImpl implements OutBoxService {
 	}
 	
 	
-	/**
-	 * Update status from inBox email
-	 * @param mailId
-	 * @param addressId
-	 * @param status
-	 * @return
-	 * @throws MailServiceException
-	 */
-	public Email updateMailMessage(Long mailId, Email email) throws MailServiceException{
-		OutBox emaiToBeUpdated = null;
-		emaiToBeUpdated = outBoxRepository.findById(mailId).get();
-		
-		if (null != emaiToBeUpdated && emaiToBeUpdated.getEmailStatusValue() != StatusEnum.ELIMINADO.getStatusId()) {
-			emaiToBeUpdated.setMessage(email.getMessage());
-			outBoxRepository.save(emaiToBeUpdated);
-		} else {
-			emaiToBeUpdated = null;
-		}
-		
-		return emaiToBeUpdated;
-	}
+//	/**
+//	 * Update status from inBox email
+//	 * @param mailId
+//	 * @param addressId
+//	 * @param status
+//	 * @return
+//	 * @throws MailServiceException
+//	 */
+//	@Override
+//	public Email updateMailMessage(Long mailId, Email email) throws MailServiceException{
+//		OutBox emaiToBeUpdated = null;
+//		emaiToBeUpdated = outBoxRepository.findById(mailId).get();
+//		
+//		if (null != emaiToBeUpdated && emaiToBeUpdated.getEmailStatusValue() != StatusEnum.ELIMINADO.getStatusId()) {
+//			emaiToBeUpdated.setMessage(email.getMessage());
+//			outBoxRepository.save(emaiToBeUpdated);
+//		} else {
+//			emaiToBeUpdated = null;
+//		}
+//		
+//		return emaiToBeUpdated;
+//	}
 	
 	
-	/**
-	 * Marca como spam todo los mails enviados desde una dirección 
-	 * @param mailsIds
-	 * @return
-	 * @throws MailServiceException
+	/*
+	 * (non-Javadoc)
+	 * @see com.example.emailbox.service.OutBoxService#setOutBoxMailsAsSpam(java.lang.String)
 	 */
 	@Transactional
+	@Override
 	public Set<Email> setOutBoxMailsAsSpam(String stringAddress) throws MailServiceException{
 		Set<Email> inBoxList = null; 
 		
@@ -203,15 +214,21 @@ public class OutBoxServiceImpl implements OutBoxService {
 	
 	
 	/**
-	 * Add Message and Addres to Inbox email List
+	 * Add Message and Addres to box email List
 	 * @param inBoxList
 	 * @param address
 	 */
-	private void addMessageAndAddresToEmailList(Set<Email> inBoxList, Address address) {
+
+	/**
+	 * Add {@link Message}  and {@link Address} to a {@link OutBox} email List
+	 * @param outBoxList
+	 * @param address
+	 */
+	private void addMessageAndAddresToEmailList(Set<Email> outBoxList, Address address) {
 		
 		try {
 		
-		inBoxList.forEach(email -> {
+			outBoxList.forEach(email -> {
 			Message message = mesageClient.getMessageById(((OutBox)email).getId()).getBody();
 			email.setMessage(message);
 			email.setAddress(address);
@@ -224,7 +241,7 @@ public class OutBoxServiceImpl implements OutBoxService {
 	
 	
 	/**
-	 * Save outbox and message asociated
+	 * Save {@link OutBox}
 	 * @param email
 	 * @return
 	 * @throws NoAddressDomainException
@@ -251,7 +268,7 @@ public class OutBoxServiceImpl implements OutBoxService {
 	
 	
 	/**
-	 * Retrieves {@link Address} a string address if not exsit retrieves null
+	 * Retrieves {@link Address} by string emails address. If not exsit return null.
 	 * @param stringAddress
 	 * @return
 	 * @throws MailServiceException

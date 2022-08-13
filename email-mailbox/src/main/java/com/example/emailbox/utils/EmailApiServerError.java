@@ -9,6 +9,12 @@ import lombok.Builder;
 import lombok.Data;
 
 
+/**
+ * Manage Api errors
+ * @author rdr
+ * @Since 13 ago 2022
+ * @Version 1.0
+ */
 @Data
 @Builder
 public class EmailApiServerError {

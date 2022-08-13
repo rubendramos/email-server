@@ -8,33 +8,33 @@ import com.example.emailmessage.exceptions.EmailMessageServiceException;
 public interface MessageService {
 
 	/**
-	 * Retrieves all mails list
+	 * Retrieves a list of ALL {@link Message}
 	 * @return
 	 */
 	public Set<Message> listAllMessages();
 	
 	/**
-	 * Gets mail by id
+	 * Gets {@link Message} by id
 	 * @param id
 	 * @return
 	 */
 	public Message getMessageById(Long id);
 	
 	/**
-	 * Create a mail
-	 * @param mail
-	 * @return
+	 * Save  {@link Message} 
+	 * @param message 
+	 * @return Message
 	 */
 	public Message saveMessage(Message message) throws EmailMessageServiceException;	
 	/**
-	 * Update a mail
+	 * Update {@link Message}
 	 * @param mail
 	 * @return
 	 */
 	public Message updateMessage(Message message) throws EmailMessageServiceException;
 	
 	/**
-	 * Delete a mail
+	 * Delete {@link Message} by Id
 	 * @param id
 	 * @return
 	 */
