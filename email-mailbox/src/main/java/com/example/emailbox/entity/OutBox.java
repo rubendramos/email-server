@@ -2,13 +2,9 @@ package com.example.emailbox.entity;
 
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -27,14 +23,14 @@ public class OutBox implements Serializable,Email {
 	@Id
     @Column(name = "message_id")
     private Long id;
+
+	@Column(name = "address_id")
+	Long addressId;
 	
-//    @OneToOne(cascade = CascadeType.ALL)
-//    @MapsId
-//    @JoinColumn(name="message_id")
+    @Transient
     private Message message;
 	
-//    @OneToOne(cascade = CascadeType.ALL)
-//	@JoinColumn(name = "address_id")
+	@Transient
 	Address address;
 
 	
@@ -71,6 +67,10 @@ public class OutBox implements Serializable,Email {
 	}
 
 
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public StatusEnum getEmailStatus() {
 		return emailStatus;
 	}
@@ -95,16 +95,26 @@ public class OutBox implements Serializable,Email {
 		return message;
 	}
 
-	public void setMessage(Message mail) {
-		this.message = mail;
+	public void setMessage(Message message) {
+		this.message = message;
+		this.id = message.getId();
 	}
 
 	public Address getAddress() {
 		return address;
 	}
 
-	public void setAddress(Address addressId) {
-		this.address = addressId;
+	public void setAddress(Address address) {
+		this.address = address;
+		this.addressId = address.getId();
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
 	}
 
 

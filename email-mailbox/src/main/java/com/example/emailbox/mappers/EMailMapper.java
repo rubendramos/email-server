@@ -55,7 +55,7 @@ public class EMailMapper {
 				.emailBody(message.getEmailBody())				
 				.createAt(message.getCreateAt())
 				.updateAt(message.getUpdateAt())
-//				.emailFrom(message.getOutBox().getAddress().getAddress())
+				.emailFrom(email.getAddress().getAddress())
 				.emailTo(new HashSet<String>(Arrays.asList(message.getEmailTo().split(MAIL_ADDRESS_SEPARATOR))))
 				.emailCc(new HashSet<String>(Arrays.asList(message.getEmailCc().split(MAIL_ADDRESS_SEPARATOR))))
 				.emailStatus(StatusEnum.of(email.getEmailStatusValue())).build();

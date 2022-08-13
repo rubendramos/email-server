@@ -27,7 +27,7 @@ import com.example.emailbox.modelo.enums.StatusEnum;
 import com.example.emailbox.service.OutBoxService;
 
 @RestController
-@RequestMapping(value = "/emailBox")
+@RequestMapping(value = "/api/outbox")
 public class OutBoxController {
 
 	Logger logger = LoggerFactory.getLogger(OutBoxController.class);

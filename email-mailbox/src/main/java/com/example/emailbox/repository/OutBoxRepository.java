@@ -9,13 +9,12 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.emailbox.entity.Email;
 import com.example.emailbox.entity.OutBox;
-import com.example.emailbox.modelo.Address;
 
 public interface OutBoxRepository extends JpaRepository<OutBox, Long>{
 
-	public Set<Email> findByAddress(Address emailAddrress);
+	public Set<Email> findByAddressId(Long addrressId);
 	
-	public Set<Email> findByAddressAndEmailStatusValue(Address emailAddrress, int emailStatusValue);
+	public Set<Email> findByAddressIdAndEmailStatusValue(Long addressId, int emailStatusValue);
 	
 	@Modifying
 	@Query("UPDATE OutBox obox SET obox.emailStatusValue = :status WHERE obox.id = :messageId")

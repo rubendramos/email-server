@@ -7,11 +7,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+
 import com.example.emailbox.modelo.Message;
 
-@FeignClient(name = "message-service")
-@RequestMapping(value = "/emailMessages")
+@FeignClient(name = "email-message", path= "/api/message")
 public interface MessageClient {
 
 	@GetMapping(value = "message/{messageId}")

@@ -20,7 +20,7 @@ import com.example.emailmessage.exceptions.EmailMessageServiceException;
 import com.example.emailmessage.service.MessageService;
 
 @RestController
-@RequestMapping(value = "/emailMessages")
+@RequestMapping(value = "/api/message")
 public class EmailMessageController {
 
 	Logger logger = LoggerFactory.getLogger(EmailMessageController.class);

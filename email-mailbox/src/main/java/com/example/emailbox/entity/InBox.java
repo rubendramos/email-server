@@ -26,13 +26,19 @@ public class InBox implements Serializable,Email {
 
 //	@ManyToOne
 //	@MapsId("messageId")
-//	@JoinColumn(name = "message_id")
+//	@Column(name = "message_id")
+	@Transient
 	Message message;
 
 //	@ManyToOne
 //	@MapsId("addressId")
-//	@JoinColumn(name = "address_id")
+//	@Column(name = "address_id")
+	@Transient
 	Address address;
+
+	public EmailAddressKey getId() {
+		return id;
+	}
 
 	public Message getMessage() {
 		return message;

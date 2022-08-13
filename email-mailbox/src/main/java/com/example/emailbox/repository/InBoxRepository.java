@@ -14,9 +14,9 @@ import com.example.emailbox.modelo.Address;
 
 public interface InBoxRepository extends JpaRepository<InBox, Long> {
 
-	public Set<Email> findByAddress(Address emailAddrress);
+	public Set<Email> findByIdAddressId(Long addrressId);
 
-	public Set<Email> findByAddressAndEmailStatusValue(Address emailAddrress, int emailStatusValue);
+	public Set<Email> findByIdAddressIdAndEmailStatusValue(Long addrressId, int emailStatusValue);
 
 	public InBox findById(EmailAddressKey emailAddressKey);
 

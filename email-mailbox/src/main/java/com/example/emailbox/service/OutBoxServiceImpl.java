@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.example.emailbox.client.AddressClient;
 import com.example.emailbox.client.MessageClient;
 import com.example.emailbox.entity.Email;
+import com.example.emailbox.entity.InBox;
 import com.example.emailbox.entity.OutBox;
 import com.example.emailbox.exceptions.MailServiceException;
 import com.example.emailbox.exceptions.NoAddressDomainException;
@@ -56,7 +57,8 @@ public class OutBoxServiceImpl implements OutBoxService {
 		
 		Address address = getAddress(stringAddress);
 		if(address != null) {
-			outBoxList = outBoxRepository.findByAddressAndEmailStatusValue(address, status.getStatusId());
+			outBoxList = outBoxRepository.findByAddressIdAndEmailStatusValue(address.getId(), status.getStatusId());
+			addMessageAndAddresToEmailList(outBoxList, address);
 		}
 		
 		return outBoxList;
@@ -67,7 +69,8 @@ public class OutBoxServiceImpl implements OutBoxService {
 		Set<Email> outBoxList = null;
 		Address address = getValidatedAddress(stringAddress);
 		if(address != null) {
-			outBoxList = outBoxRepository.findByAddress(address);		
+			outBoxList = outBoxRepository.findByAddressId(address.getId());		
+			addMessageAndAddresToEmailList(outBoxList, address);
 		}
 		
 		return outBoxList;
@@ -183,7 +186,7 @@ public class OutBoxServiceImpl implements OutBoxService {
 		
 			Address address = getAddress(stringAddress);
 			if(address != null) {
-				inBoxList = outBoxRepository.findByAddressAndEmailStatusValue(address,StatusEnum.ENVIADO.getStatusId());
+				inBoxList = outBoxRepository.findByAddressIdAndEmailStatusValue(address.getId(),StatusEnum.ENVIADO.getStatusId());
 				inBoxList.forEach(outbox -> {
 				outBoxRepository.updateStatus(outbox.getMessage().getId(), StatusEnum.SPAN.getStatusId());
 			});
@@ -200,6 +203,27 @@ public class OutBoxServiceImpl implements OutBoxService {
 	
 	
 	/**
+	 * Add Message and Addres to Inbox email List
+	 * @param inBoxList
+	 * @param address
+	 */
+	private void addMessageAndAddresToEmailList(Set<Email> inBoxList, Address address) {
+		
+		try {
+		
+		inBoxList.forEach(email -> {
+			Message message = mesageClient.getMessageById(((OutBox)email).getId()).getBody();
+			email.setMessage(message);
+			email.setAddress(address);
+		});
+		
+		}catch(Exception e) {
+			logger.error("Error setting message to email");
+		}
+	}
+	
+	
+	/**
 	 * Save outbox and message asociated
 	 * @param email
 	 * @return
@@ -207,11 +231,20 @@ public class OutBoxServiceImpl implements OutBoxService {
 	 */
 	private Email saveOutBoxEmail(OutBox email) throws NoAddressDomainException{
 		OutBox savedEmail = null;
+		try {
+		
 		Address address = getValidatedAddress(email.getMessage().getEmailFrom());
 			if(address != null) {
-			savedEmail = outBoxRepository.save(email);
 			Message savedMessage= mesageClient.saveMessage(email.getMessage()).getBody();
+			email.setMessage(savedMessage);
+			email.setAddress(address);
+			savedEmail = outBoxRepository.save(email);
+			savedEmail.setAddress(address);
 			savedEmail.setMessage(savedMessage);
+		}
+			
+		}catch(Exception e) {
+			logger.error("Error saving OutBox mail",e);
 		}
 		return savedEmail;
 	}

@@ -13,7 +13,7 @@ import com.example.emailaddress.entity.Address;
 import com.example.emailaddress.service.AddressService;
 
 @RestController
-@RequestMapping(value = "/emailAddress")
+@RequestMapping(value = "api/address")
 public class EMailController {
 
 	Logger logger = LoggerFactory.getLogger(EMailController.class);
@@ -21,8 +21,8 @@ public class EMailController {
 	@Autowired
 	private AddressService addressService;
 
-	@GetMapping(value = "addresId/{addressId}")
-	public ResponseEntity<Address> addressById(@PathVariable("addressId") Long addressId) {
+	@GetMapping(value = "/addressId/{addressId}")
+	public ResponseEntity<Address> getAddressById(@PathVariable("addressId") Long addressId) {
 		Address address = addressService.getAddresById(addressId);
 		if (address != null) {
 			return ResponseEntity.ok(address);

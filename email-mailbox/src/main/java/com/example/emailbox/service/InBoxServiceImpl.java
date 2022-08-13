@@ -55,17 +55,21 @@ public class InBoxServiceImpl implements InBoxService {
 		Set<Email> inBoxList = null;
 		Address address = getValidatedAddress(stringAddress);
 		if(address != null) {
-			inBoxList  = inBoxRepository.findByAddressAndEmailStatusValue(address, status.getStatusId());
+			inBoxList  = inBoxRepository.findByIdAddressIdAndEmailStatusValue(address.getId(), status.getStatusId());
+			addMessageAndAddresToEmailList(inBoxList, address);
 		}
 		return inBoxList;
 	}
+	
+
 
 	@Override
 	public Set<Email> listEmailsFromAddres(String stringAddress) throws MailServiceException {
 		Set<Email> inBoxList = null;
 		Address address = getValidatedAddress(stringAddress);
 		if(address != null) {
-			 inBoxList = inBoxRepository.findByAddress(address);
+			 inBoxList = inBoxRepository.findByIdAddressId(address.getId());
+			 addMessageAndAddresToEmailList(inBoxList, address);
 		}
 		return inBoxList;
 
@@ -75,14 +79,17 @@ public class InBoxServiceImpl implements InBoxService {
 	public Email sendMail(Long mailId) throws MailServiceException, EmailStatusException {
 		OutBox outBoxMail = null;
 		Message message = null;
+		Address address = null; 
 		List<InBox> recipients = new ArrayList<>();
 
 		try {
-
 			
 			outBoxMail = outBoxRepository.findById(mailId).get();
-			message = mesageClient.getMessageById(outBoxMail.getMessage().getId()).getBody();
+			
+			message = mesageClient.getMessageById(outBoxMail.getId()).getBody();
+			address = addressClient.getAddressById(outBoxMail.getAddressId()).getBody();
 			outBoxMail.setMessage(message);
+			outBoxMail.setAddress(address);
 			
 			Set<String> addressStringToSet = EmailServerUtils.getAddressSet(message.getEmailTo());
 			Set<String> addressStringCcSet = EmailServerUtils.getAddressSet(message.getEmailCc());
@@ -167,7 +174,7 @@ public class InBoxServiceImpl implements InBoxService {
 		
 			Address address = getValidatedAddress(stringAddress);
 			if(address != null) {
-				inBoxList = inBoxRepository.findByAddressAndEmailStatusValue(address,StatusEnum.ENVIADO.getStatusId());
+				inBoxList = inBoxRepository.findByIdAddressIdAndEmailStatusValue(address.getId(),StatusEnum.ENVIADO.getStatusId());
 				inBoxList.forEach(outbox -> {
 				inBoxRepository.updateStatus(outbox.getMessage().getId(), StatusEnum.SPAN.getStatusId());
 			});
@@ -208,6 +215,28 @@ public class InBoxServiceImpl implements InBoxService {
 		return ematilToUpdate;
 	}
 
+	
+	
+	/**
+	 * Add Message and Addres to Inbox email List
+	 * @param inBoxList
+	 * @param address
+	 */
+	private void addMessageAndAddresToEmailList(Set<Email> inBoxList, Address address) {
+		
+		try {
+		
+		inBoxList.forEach(email -> {
+			Message message = mesageClient.getMessageById(((InBox)email).getId().getMessageId()).getBody();
+			email.setMessage(message);
+			email.setAddress(address);
+		});
+		
+		}catch(Exception e) {
+			logger.error("Error setting message to email");
+		}
+	}
+	
 	
 	private Set<Address> validateAddressSet(Set<String> stringAddressSet) {
 		Set<Address> validAddress = new HashSet<>();
