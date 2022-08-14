@@ -6,6 +6,13 @@ import com.example.emailaddress.entity.Address;
 
 public interface AddressService {
 
+	/**
+	 * Create a email {@link Address} 
+	 * @param address
+	 * @return
+	 */
+	public Address createAddress(Address address);
+	
 	
 	/**
 	 * Retrieves all mails address list
