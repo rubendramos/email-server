@@ -14,9 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.example.emailbox.entity.Email;
 import com.example.emailbox.entity.OutBox;
+import com.example.emailbox.exceptions.MailServiceException;
 import com.example.emailbox.modelo.Address;
 import com.example.emailbox.modelo.Message;
 import com.example.emailbox.modelo.enums.StatusEnum;
+import com.example.emailbox.repository.InBoxRepository;
 import com.example.emailbox.repository.OutBoxRepository;
 import com.example.emailbox.service.OutBoxService;
 import com.example.emailbox.service.OutBoxServiceImpl;
@@ -27,12 +29,16 @@ public class EMailBoxServiceMockTest {
 	@Mock
 	private OutBoxRepository outBoxRepository;
 	
+	@Mock
+	private InBoxRepository inBoxRepository;
+	
 	private OutBoxService outBoxService;
+	
 	
 	@BeforeEach
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		outBoxService = new OutBoxServiceImpl(outBoxRepository);	
+		outBoxService = new OutBoxServiceImpl(outBoxRepository, inBoxRepository);	
 		
 		Address address1 = Address.builder()
 				.address("a1@gmail.com").build();
@@ -54,7 +60,7 @@ public class EMailBoxServiceMockTest {
 	}
 	
 	@Test
-	public void whenValidGetId_thenReturnAddress() {
+	public void whenValidGetId_thenReturnAddress() throws MailServiceException {
 		Email emailFound= outBoxService.getOutBoxById(13L);
 		Assertions.assertThat(emailFound.getAddress()).isEqualTo("b@gmail.com");
 	}

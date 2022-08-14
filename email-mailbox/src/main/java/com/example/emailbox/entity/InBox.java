@@ -24,15 +24,9 @@ public class InBox implements Serializable,Email {
 	@EmbeddedId
 	EmailAddressKey id;
 
-//	@ManyToOne
-//	@MapsId("messageId")
-//	@Column(name = "message_id")
 	@Transient
 	Message message;
 
-//	@ManyToOne
-//	@MapsId("addressId")
-//	@Column(name = "address_id")
 	@Transient
 	Address address;
 
@@ -124,7 +118,6 @@ public class InBox implements Serializable,Email {
 	public void setEmailStatusValue(int emailStatusValue) {
 		this.emailStatusValue = emailStatusValue;
 	}
-	
 
 	public InBox() {
 	}
@@ -138,7 +131,5 @@ public class InBox implements Serializable,Email {
 		this.emailStatusValue = this.emailStatus.getStatusId();
 		this.id = new EmailAddressKey(this.message.getId(), address.getId());
 	}
-
-
 
 }

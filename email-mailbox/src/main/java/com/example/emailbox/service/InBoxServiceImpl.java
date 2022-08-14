@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,45 +39,52 @@ import lombok.RequiredArgsConstructor;
 public class InBoxServiceImpl implements InBoxService {
 
 	Logger logger = LoggerFactory.getLogger(InBoxServiceImpl.class);
+	private static final String ERROR_DELETE_INTBOX_MESSAGE = "Error deleting inbox message with ID = %s.";
+	private static final String ERROR_GETTING_ADDRESS_AND_MESSAGE = "Error getting  address and messag from message with ID = %s.";
 
 	@Autowired
 	AddressClient addressClient;
-	
+
 	@Autowired
-	MessageClient mesageClient;
-	
+	MessageClient messageClient;
+
 	private final InBoxRepository inBoxRepository;
 	private final OutBoxRepository outBoxRepository;
-	
+
 	/*
 	 * (non-Javadoc)
-	 * @see com.example.emailbox.service.InBoxService#listEmailsFromAddresAndStatus(java.lang.String, com.example.emailbox.modelo.enums.StatusEnum)
+	 * 
+	 * @see
+	 * com.example.emailbox.service.InBoxService#listEmailsFromAddresAndStatus(java.
+	 * lang.String, com.example.emailbox.modelo.enums.StatusEnum)
 	 */
-	@Override	
+	@Override
 	public Set<Email> listEmailsFromAddresAndStatus(String stringAddress, StatusEnum status)
 			throws MailServiceException {
-		
+
 		Set<Email> inBoxList = null;
 		Address address = getValidatedAddress(stringAddress);
-		if(address != null) {
-			inBoxList  = inBoxRepository.findByIdAddressIdAndEmailStatusValue(address.getId(), status.getStatusId());
+		if (address != null) {
+			inBoxList = inBoxRepository.findByIdAddressIdAndEmailStatusValue(address.getId(), status.getStatusId());
 			addMessageAndAddresToEmailList(inBoxList, address);
 		}
 		return inBoxList;
 	}
-	
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.example.emailbox.service.InBoxService#listEmailsFromAddres(java.lang.String)
+	 * 
+	 * @see
+	 * com.example.emailbox.service.InBoxService#listEmailsFromAddres(java.lang.
+	 * String)
 	 */
 	@Override
 	public Set<Email> listEmailsFromAddres(String stringAddress) throws MailServiceException {
 		Set<Email> inBoxList = null;
 		Address address = getValidatedAddress(stringAddress);
-		if(address != null) {
-			 inBoxList = inBoxRepository.findByIdAddressId(address.getId());
-			 addMessageAndAddresToEmailList(inBoxList, address);
+		if (address != null) {
+			inBoxList = inBoxRepository.findByIdAddressId(address.getId());
+			addMessageAndAddresToEmailList(inBoxList, address);
 		}
 		return inBoxList;
 
@@ -87,24 +92,48 @@ public class InBoxServiceImpl implements InBoxService {
 
 	/*
 	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.example.emailbox.service.InBoxService#listEmailsFromAddres(java.lang.
+	 * String)
+	 */
+	@Override
+	public Set<Email> emailListByMessageId(Long messageId) throws MailServiceException {
+		Set<Email> inBoxList = null;
+		inBoxList = inBoxRepository.findByIdMessageId(messageId);
+		inBoxList.forEach(inBox -> {
+			try {
+				addMessageAndAddres(inBox);
+			} catch (MailServiceException e) {
+				logger.error(String.format(ERROR_GETTING_ADDRESS_AND_MESSAGE, messageId));
+			}
+		});
+
+		return inBoxList;
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.example.emailbox.service.InBoxService#sendMail(java.lang.Long)
 	 */
 	@Override
 	public Email sendMail(Long mailId) throws MailServiceException, EmailStatusException {
 		OutBox outBoxMail = null;
 		Message message = null;
-		Address address = null; 
+		Address address = null;
 		List<InBox> recipients = new ArrayList<>();
 
 		try {
-			
+
 			outBoxMail = outBoxRepository.findById(mailId).get();
-			
-			message = mesageClient.getMessageById(outBoxMail.getId()).getBody();
+
+			message = messageClient.getMessageById(outBoxMail.getId()).getBody();
 			address = addressClient.getAddressById(outBoxMail.getAddressId()).getBody();
 			outBoxMail.setMessage(message);
 			outBoxMail.setAddress(address);
-			
+
 			Set<String> addressStringToSet = EmailServerUtils.getAddressSet(message.getEmailTo());
 			Set<String> addressStringCcSet = EmailServerUtils.getAddressSet(message.getEmailCc());
 
@@ -121,7 +150,7 @@ public class InBoxServiceImpl implements InBoxService {
 
 			if (outBoxMail.getEmailStatus() == StatusEnum.BORRADOR) {
 				outBoxMail.setEmailStatusValue(StatusEnum.ENVIADO.getStatusId());
-				
+
 				inBoxRepository.saveAll(recipients);
 				outBoxRepository.save(outBoxMail);
 
@@ -140,27 +169,28 @@ public class InBoxServiceImpl implements InBoxService {
 
 	}
 
-
 	/*
 	 * (non-Javadoc)
-	 * @see com.example.emailbox.service.InBoxService#deleteInBox(java.lang.Long, java.lang.Long)
+	 * 
+	 * @see com.example.emailbox.service.InBoxService#deleteInBox(java.lang.Long,
+	 * java.lang.Long)
 	 */
 	@Override
-	public InBox deleteInBox(Long id, Long address) {
-		InBox ematilToDeleted = null;
+	public Email deleteInBox(Long id, Long address) throws MailServiceException {
+		InBox ematilToBeDeleted = null;
+		Email emailDeleted = null;
 		EmailAddressKey eak = new EmailAddressKey();
 		eak.setMessageId(id);
 		eak.setAddressId(address);
-		ematilToDeleted = inBoxRepository.findById(eak);
-		if (null != ematilToDeleted && ematilToDeleted.getEmailStatusValue() != StatusEnum.ELIMINADO.getStatusId()) {
+		ematilToBeDeleted = inBoxRepository.findById(eak);
 
-			ematilToDeleted.setEmailStatusValue(StatusEnum.ELIMINADO.getStatusId());
-			inBoxRepository.save(ematilToDeleted);
-		} else {
-			ematilToDeleted = null;
+		if (null != ematilToBeDeleted
+				&& ematilToBeDeleted.getEmailStatusValue() != StatusEnum.ELIMINADO.getStatusId()) {
+			ematilToBeDeleted.setEmailStatusValue(StatusEnum.ELIMINADO.getStatusId());
+			emailDeleted = inBoxRepository.save(ematilToBeDeleted);
 		}
 
-		return ematilToDeleted;
+		return addMessageAndAddres(emailDeleted);
 	}
 
 	@Override
@@ -168,55 +198,72 @@ public class InBoxServiceImpl implements InBoxService {
 		Set<Email> deletedMails = new HashSet<>();
 
 		mailsIds.forEach(mailId -> {
-			Email deleteMail = deleteInBox(mailId, address);
-			if (null != deleteMail) {
-				deletedMails.add(deleteMail);
+			try {
+				Email deleteMail = deleteInBox(mailId, address);
+				if (null != deleteMail) {
+					deletedMails.add(deleteMail);
+				}
+			} catch (MailServiceException e) {
+				logger.error(String.format(ERROR_DELETE_INTBOX_MESSAGE, mailId));
 			}
 		});
 
 		return deletedMails;
 	}
-	
+
+//	/*
+//	 * (non-Javadoc)
+//	 * 
+//	 * @see com.example.emailbox.service.InBoxService#setInBoxMailsAsSpam(java.lang.
+//	 * String)
+//	 */
+//	@Transactional
+//	@Override
+//	public Set<Email> updateMailsAsSpam(String stringAddress) throws MailServiceException {
+//		Set<Email> sendedMailsToBeUPdated = null;
+//
+//		try {
+//
+//			Address address = getValidatedAddress(stringAddress);
+//			if (address != null) {
+//				sendedMailsToBeUPdated = outBoxRepository.findByAddressIdAndEmailStatusValue(address.getId(),
+//						StatusEnum.ENVIADO.getStatusId());
+//				sendedMailsToBeUPdated.forEach(outbox -> {
+//					Long messageId = null;
+//					try {
+//						messageId = ((OutBox)outbox).getId();
+//						outBoxRepository.updateStatus(messageId, StatusEnum.SPAN.getStatusId());
+//						inBoxRepository.updateStatus(messageId, StatusEnum.SPAN.getStatusId());
+//						
+//					} catch (Exception e) {
+//						logger.error(String.format(ERROR_UPDATE_MESSAGE, messageId));
+//					}
+//				});
+//			}
+//
+//		} catch (Exception e) {
+//			logger.error(String.format(ERROR_UPDATE_TO_SPAM, stringAddress));
+//			throw new MailServiceException(e, new Object[] { String.format(ERROR_UPDATE_TO_SPAM, stringAddress) });
+//		}
+//
+//		return sendedMailsToBeUPdated;
+//	}
+
 	/*
 	 * (non-Javadoc)
-	 * @see com.example.emailbox.service.InBoxService#setInBoxMailsAsSpam(java.lang.String)
-	 */
-	@Transactional
-	@Override
-	public Set<Email> setInBoxMailsAsSpam(String stringAddress) throws MailServiceException{
-		Set<Email> inBoxList = null; 
-		
-		try {
-		
-			Address address = getValidatedAddress(stringAddress);
-			if(address != null) {
-				inBoxList = inBoxRepository.findByIdAddressIdAndEmailStatusValue(address.getId(),StatusEnum.ENVIADO.getStatusId());
-				inBoxList.forEach(outbox -> {
-				inBoxRepository.updateStatus(outbox.getMessage().getId(), StatusEnum.SPAN.getStatusId());
-			});
-			
-			}
-		
-		
-		}catch(Exception e) {
-			logger.error("Error update to spam");
-		}
-		
-		return inBoxList;
-	}	
-	
-	/*
-	 * (non-Javadoc)
-	 * @see com.example.emailbox.service.InBoxService#updateMailStatus(java.lang.Long, java.lang.Long, com.example.emailbox.modelo.enums.StatusEnum)
+	 * 
+	 * @see
+	 * com.example.emailbox.service.InBoxService#updateMailStatus(java.lang.Long,
+	 * java.lang.Long, com.example.emailbox.modelo.enums.StatusEnum)
 	 */
 	@Override
-	public Email updateMailStatus(Long mailId, Long addressId , StatusEnum status) throws MailServiceException{
+	public Email updateMailStatus(Long mailId, Long addressId, StatusEnum status) throws MailServiceException {
 		InBox ematilToUpdate = null;
 		EmailAddressKey eak = new EmailAddressKey();
 		eak.setMessageId(mailId);
 		eak.setAddressId(addressId);
 		ematilToUpdate = inBoxRepository.findById(eak);
-		
+
 		if (null != ematilToUpdate && ematilToUpdate.getEmailStatusValue() != StatusEnum.ELIMINADO.getStatusId()) {
 
 			ematilToUpdate.setEmailStatusValue(status.getStatusId());
@@ -224,36 +271,66 @@ public class InBoxServiceImpl implements InBoxService {
 		} else {
 			ematilToUpdate = null;
 		}
-		
+
 		return ematilToUpdate;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.example.emailbox.service.InBoxService#getInBoxMailById(java.lang.Long)
+	 */
+	public Email getInBoxMailById(EmailAddressKey emailAddresKey) throws MailServiceException {
+		return addMessageAndAddres(inBoxRepository.findById(emailAddresKey));
+	}
 
-	
-	
 	/**
 	 * Add Message and Address to Inbox {@link Email} {@link Set}
+	 * 
 	 * @param inBoxList
 	 * @param address
 	 */
 	private void addMessageAndAddresToEmailList(Set<Email> inBoxList, Address address) {
-		
+
 		try {
-		
-		inBoxList.forEach(email -> {
-			Message message = mesageClient.getMessageById(((InBox)email).getId().getMessageId()).getBody();
-			email.setMessage(message);
-			email.setAddress(address);
-		});
-		
-		}catch(Exception e) {
+
+			inBoxList.forEach(email -> {
+				Message message = messageClient.getMessageById(((InBox) email).getId().getMessageId()).getBody();
+				email.setMessage(message);
+				email.setAddress(address);
+			});
+
+		} catch (Exception e) {
 			logger.error("Error setting message to email");
 		}
 	}
-	
-	
+
+	/**
+	 * Add {@link Message} and {@link Address} to a {@link OutBox} email List
+	 * 
+	 * @param outBoxList
+	 * @param address
+	 */
+	private Email addMessageAndAddres(Email email) throws MailServiceException {
+
+		try {
+			Message message = messageClient.getMessageById(((InBox) email).getId().getMessageId()).getBody();
+			Address address = addressClient.getAddressById(((InBox) email).getId().getAddressId()).getBody();
+			email.setMessage(message);
+			email.setAddress(address);
+
+		} catch (Exception e) {
+			logger.error("Error setting message to email");
+			throw new MailServiceException(e, new Object[] { email });
+		}
+
+		return email;
+	}
+
 	/**
 	 * Add to a set all valid Addess
+	 * 
 	 * @param stringAddressSet
 	 * @return
 	 */
@@ -269,9 +346,10 @@ public class InBoxServiceImpl implements InBoxService {
 		return validAddress;
 	}
 
-	
 	/**
-	 * Generates a {@link InBox} {@link Email} from {@link Address},  {@link Message} and {@link AddressTypeEnum}
+	 * Generates a {@link InBox} {@link Email} from {@link Address}, {@link Message}
+	 * and {@link AddressTypeEnum}
+	 * 
 	 * @param mail
 	 * @param addressSet
 	 * @param addressTypeEnum
@@ -288,29 +366,33 @@ public class InBoxServiceImpl implements InBoxService {
 		}
 		return recipients;
 	}
-	
+
 	/**
-	 * Retrieves {@link Address} by a string email address. If not exits return null.
+	 * Retrieves {@link Address} by a string email address. If not exits return
+	 * null.
+	 * 
 	 * @param stringAddress
 	 * @return
 	 * @throws MailServiceException
 	 */
 	private Address getAddress(String stringAddress) {
-		return  addressClient.getAddressByEmailAddress(stringAddress).getBody();
+		return addressClient.getAddressByEmailAddress(stringAddress).getBody();
 	}
-	
+
 	/**
-	 * Retrieves {@link Address} by a string address if not exsits trhows {@link NoAddressDomainException} 
+	 * Retrieves {@link Address} by a string address if not exsits trhows
+	 * {@link NoAddressDomainException}
+	 * 
 	 * @param stringAddress
 	 * @return
 	 * @throws MailServiceException
 	 */
-	private Address getValidatedAddress(String stringAddress) throws MailServiceException{
+	private Address getValidatedAddress(String stringAddress) throws MailServiceException {
 		Address address = null;
 		address = getAddress(stringAddress);
 		if (address == null) {
 			throw new NoAddressDomainException(new Object[] { stringAddress });
 		}
 		return address;
-	}	
+	}
 }

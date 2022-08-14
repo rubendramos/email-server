@@ -6,11 +6,9 @@ import java.util.Set;
 
 import com.example.emailbox.dto.MailDTO;
 import com.example.emailbox.entity.Email;
-import com.example.emailbox.entity.InBox;
 import com.example.emailbox.entity.OutBox;
 import com.example.emailbox.modelo.Address;
 import com.example.emailbox.modelo.Message;
-import com.example.emailbox.modelo.enums.AddressTypeEnum;
 import com.example.emailbox.modelo.enums.StatusEnum;
 
 public class EMailMapper {
@@ -42,8 +40,6 @@ public class EMailMapper {
 		Address senderAddress = Address.builder().address(mailDTO.getEmailFrom()).build();
 		
 		OutBox outBox = new OutBox(message,senderAddress,mailDTO.getEmailStatus());
-
-//		message.setOutBox(outBox);
 		
 		return outBox;
 	}
@@ -66,51 +62,6 @@ public class EMailMapper {
 		Set<MailDTO> mailDTOList = new HashSet<>();
 		emailList.forEach(email -> mailDTOList.add(parseMailToMailDTO(email)));
 		return mailDTOList;
-	}
-	
-	/**
-	 * Add an address to TO,CC or BCC List depends on AddressTypeEnum
-	 * 
-	 * @param address
-	 */
-	private static void addEmailAddressFromRecipients(MailDTO mailDTO, Set<InBox> emailAddressSet) {
-
-		emailAddressSet.forEach(emailAddress -> {
-			switch (emailAddress.getEmailAddressType()) {
-			case TO:
-				mailDTO.getEmailTo().add(emailAddress.getAddress().getAddress());
-				break;
-			case CC:
-				mailDTO.getEmailCc().add(emailAddress.getAddress().getAddress());
-				break;
-			case BCC:
-				break;
-			}
-		});
-	}
-	
-	
-	private static OutBox addSenderFromMailDTO(Message mail, MailDTO mailDTO){
-		Address senderAddress = Address.builder().address(mailDTO.getEmailFrom()).build();
-		return new OutBox(mail, senderAddress, mailDTO.getEmailStatus());
-	}
-	
-	private static Set<InBox> addRecipientsFromMailDTO(Message mail, MailDTO mailDTO){
-		Set<InBox> recipients = new HashSet<>();
-//		recipients.addAll(getEmailAddress(mail,mailDTO.getEmailTo(), AddressTypeEnum.TO, mail.getOutBox().getEmailStatus()));
-//		recipients.addAll(getEmailAddress(mail,mailDTO.getEmailCc(), AddressTypeEnum.BCC, mail.getOutBox().getEmailStatus()));
-		return recipients;
-	}
-	
-	private static Set<InBox> getEmailAddress(Message mail, Set<String> addressList, AddressTypeEnum addressTypeEnum, StatusEnum status ){
-		Set<InBox> recipients = new HashSet<>();
-			if(addressList != null && !addressList.isEmpty()) {
-			addressList.forEach(addressString-> {
-				Address address = Address.builder().address(addressString).build();
-				recipients.add(new InBox(mail, address, addressTypeEnum, status));
-			});
-		}
-		return recipients;	
 	}
 	
 }

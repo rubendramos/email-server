@@ -35,6 +35,6 @@ public interface OutBoxRepository extends JpaRepository<OutBox, Long>{
 	 * @return
 	 */
 	@Modifying
-	@Query("UPDATE OutBox obox SET obox.emailStatusValue = :status WHERE obox.id = :messageId")
+	@Query("UPDATE OutBox obox SET obox.emailStatusValue = :status WHERE obox.id = :messageId and obox.emailStatusValue != 3")
 	public int updateStatus(@Param("messageId") Long messageId, @Param("status") int status);
 }

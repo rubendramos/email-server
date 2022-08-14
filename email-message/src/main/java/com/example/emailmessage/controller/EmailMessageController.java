@@ -2,6 +2,8 @@ package com.example.emailmessage.controller;
 
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +69,7 @@ public class EmailMessageController {
 	 * @throws EmailMessageServiceException
 	 */
 	@PostMapping
-	public ResponseEntity<Message> saveMessage(@RequestBody Message message)
+	public ResponseEntity<Message> saveMessage(@RequestBody @Valid Message message)
 			throws EmailMessageServiceException {
 		Message messaUpdated = null;
 
@@ -93,7 +95,7 @@ public class EmailMessageController {
 	 * @throws EmailMessageServiceException
 	 */
 	@PutMapping(value = "update/{messageId}")
-	public ResponseEntity<Message> updateMessage(@PathVariable("messageId") Long messageId, @RequestBody Message message)
+	public ResponseEntity<Message> updateMessage(@PathVariable("messageId") Long messageId, @RequestBody @Valid Message message)
 			throws EmailMessageServiceException {
 		Message messaUpdated = null;
 

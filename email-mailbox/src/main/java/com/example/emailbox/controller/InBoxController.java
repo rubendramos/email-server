@@ -2,6 +2,8 @@ package com.example.emailbox.controller;
 
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,16 +15,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.emailbox.dto.EmailAddressKeyDTO;
 import com.example.emailbox.dto.MailDTO;
-import com.example.emailbox.dto.MultipleDeleteDTO;
 import com.example.emailbox.entity.Email;
+import com.example.emailbox.entity.EmailAddressKey;
 import com.example.emailbox.exceptions.EmailStatusException;
 import com.example.emailbox.exceptions.MailServiceException;
 import com.example.emailbox.mappers.EMailMapper;
-import com.example.emailbox.modelo.Message;
 import com.example.emailbox.modelo.enums.StatusEnum;
 import com.example.emailbox.service.InBoxService;
 import com.example.emailbox.service.OutBoxService;
@@ -42,47 +43,27 @@ public class InBoxController {
 	private OutBoxService outBoxService;
 	
 
-	@GetMapping("/inbox")
-	public ResponseEntity<Set<MailDTO>> listIntBoxMails(@RequestParam String addressParam,
-			@RequestParam int statusParam) throws MailServiceException {
+	@GetMapping
+	public ResponseEntity<MailDTO> getInBoxById(@RequestBody EmailAddressKeyDTO emailAddressKeyDTO) throws MailServiceException {
 
-		StatusEnum statusEnum = StatusEnum.of(statusParam);
-		Set<Email> mails = inBoxService.listEmailsFromAddresAndStatus(addressParam, statusEnum);
-		if (!mails.isEmpty()) {
-			return ResponseEntity.ok(EMailMapper.convertToDTO(mails));
+		Email mail = inBoxService.getInBoxMailById(new EmailAddressKey(emailAddressKeyDTO.getMessageId(), emailAddressKeyDTO.getAddressId()));
+		if (mail != null) {
+			return ResponseEntity.ok(EMailMapper.convertToDTO(mail));
 		}
 		return ResponseEntity.noContent().build();
 	}
 
+	
+	@GetMapping("/{messageId}")
+	public ResponseEntity<Set<MailDTO>> getInBoxById(@PathVariable("messageId") Long messageId) throws MailServiceException {
 
-
-
-	@PutMapping(value = "updateMailMessage/{mailId}")
-	public ResponseEntity<MailDTO> updateMailMessage(@PathVariable("mailId") Long mailId, @RequestBody MailDTO mailDTO)
-			throws MailServiceException {
-		Message messaUpdated = null;
-		Email emailUpdated = null;
-
-		try {
-
-			mailDTO.setMailId(mailId);
-			emailUpdated = EMailMapper.convertToEntity(mailDTO);
-			//messaUpdated = messageService.updateMail(EMailMapper.convertToEntity(mailDTO).getMessage());
-			//call message client
-			if (messaUpdated == null) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-			}
-			emailUpdated.setMessage(messaUpdated);
-			
-			//TODO call meesage cliente
-			//emailUpdated.setEmailStatusValue(messaUpdated.getOutBox().getEmailStatusValue());
-
-		} catch (Exception e) {
-			throw new MailServiceException(e, new Object[] { mailId });
+		Set<Email> mailSet = inBoxService.emailListByMessageId(messageId);
+		if (!mailSet.isEmpty()) {
+			return ResponseEntity.ok(EMailMapper.convertToDTO(mailSet));
 		}
-
-		return ResponseEntity.ok(EMailMapper.convertToDTO(emailUpdated));
+		return ResponseEntity.noContent().build();
 	}
+
 	
 	@PutMapping(value = "updateOutBoxStatusMail/{mailId}/{statusId}")
 	public ResponseEntity<MailDTO> updateOutBoxStatusMail(@PathVariable("mailId") Long mailId,@PathVariable("statusId") int statusId)
@@ -126,33 +107,33 @@ public class InBoxController {
 	}
 
 	
-	
-	
-	@PostMapping("/deleteMultiple")
-	public ResponseEntity<Set<MailDTO>> deleteMultipleMail(@RequestBody MultipleDeleteDTO emailsIds) {
-		Set<Email> deletedMails = null;
+	/**
+	 * Create a mail from a {@link MailDTO}
+	 * 
+	 * @param mailDTO
+	 * @return
+	 */
+	@PostMapping
+	public ResponseEntity<MailDTO> createAndSendMail(@RequestBody @Valid MailDTO mailDTO) throws MailServiceException{
+		Email savedMail = null;
+		
 
-		try {
-
-			switch (emailsIds.getMailBoxType()) {
-			case INBOX:
-				deletedMails = inBoxService.deleteInBox(emailsIds.getEmailIDs(), emailsIds.getAddressId());
-				break;
-			case OUTBOX:
-				deletedMails = outBoxService.deleteOutBox(emailsIds.getEmailIDs());
-			}
-
-			if (deletedMails == null) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-			}
-
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		if (mailDTO != null) {
+			Email mail = EMailMapper.convertToEntity(mailDTO);
+			savedMail = outBoxService.createOutBox(mail);
+			savedMail = inBoxService.sendMail(savedMail.getMessage().getId());
 		}
-
-		return ResponseEntity.ok(EMailMapper.convertToDTO(deletedMails));
+		
+		return ResponseEntity.status(HttpStatus.CREATED).body(EMailMapper.convertToDTO(savedMail));
 	}
-
+	
+	/**
+	 * Send a mail by Id
+	 * @param mailId
+	 * @return
+	 * @throws MailServiceException
+	 * @throws EmailStatusException
+	 */
 	@PostMapping(value = "/sendMailById/{mailId}")
 	public ResponseEntity<MailDTO> sendMailById(@PathVariable("mailId") Long mailId)
 			throws MailServiceException, EmailStatusException {
@@ -165,13 +146,20 @@ public class InBoxController {
 
 		return ResponseEntity.ok(EMailMapper.convertToDTO(mailSended));
 	}
-
+	
+	/**
+	 * Update sent OutBox and InBox messages as SPAM by string email address
+	 * @param emailAddress
+	 * @return
+	 * @throws MailServiceException
+	 * @throws EmailStatusException
+	 */
 	@PostMapping(value = "/setAsSpam/{emailAddress}")
 	public ResponseEntity<Set<MailDTO>> setAsSpam(@PathVariable("emailAddress") String emailAddress)
 			throws MailServiceException, EmailStatusException {
 		Set<Email> updatedMails = null;
 
-		updatedMails = inBoxService.setInBoxMailsAsSpam(emailAddress);
+		updatedMails = outBoxService.updateMailsAsSpam(emailAddress);
 		if (updatedMails == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}

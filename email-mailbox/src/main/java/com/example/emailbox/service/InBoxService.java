@@ -3,6 +3,7 @@ package com.example.emailbox.service;
 import java.util.Set;
 
 import com.example.emailbox.entity.Email;
+import com.example.emailbox.entity.EmailAddressKey;
 import com.example.emailbox.entity.InBox;
 import com.example.emailbox.exceptions.EmailStatusException;
 import com.example.emailbox.exceptions.MailServiceException;
@@ -24,6 +25,13 @@ public interface InBoxService {
 	 */
 	public Set<Email> listEmailsFromAddres(String addressParam) throws MailServiceException;
 	
+	/**
+	 * Retrieves a {@link Email}  {@link Set} by mesageId
+	 * @param messageId
+	 * @return
+	 * @throws MailServiceException
+	 */
+	public Set<Email> emailListByMessageId(Long messageId) throws MailServiceException;
 	
 	/**
 	 * Send a {@link Email} by messageId
@@ -41,7 +49,7 @@ public interface InBoxService {
 	 * @return
 	 * @throws MailServiceException
 	 */
-	public InBox deleteInBox(Long messageId,Long address) throws MailServiceException;
+	public Email deleteInBox(Long messageId,Long address) throws MailServiceException;
 	
 	/**
 	 * Delete an {@link Email} {@link Set}   by messageId and addressId
@@ -63,12 +71,8 @@ public interface InBoxService {
 	public Email updateMailStatus(Long messageId, Long addressId , StatusEnum status) throws MailServiceException;
 		
 	
-	
 	/**
-	 * Set as {@link StatusEnum} SPAN All {@link Email} sent from {@link Address}
-	 * @param addressParam
-	 * @return
-	 * @throws MailServiceException
+	 * Get {@link InBox} by Id
 	 */
-	public Set<Email> setInBoxMailsAsSpam(String addressParam) throws MailServiceException;
+	public Email getInBoxMailById(EmailAddressKey emailAddressKey) throws MailServiceException;
 }

@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -52,6 +53,7 @@ public class OutBox implements Serializable,Email {
 
 
 	@PostLoad
+	@PostPersist
 	void fillTransient() {
 		if (emailStatusValue > 0) {
 			this.emailStatus = StatusEnum.of(emailStatusValue);

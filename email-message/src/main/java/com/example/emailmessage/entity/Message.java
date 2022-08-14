@@ -12,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,16 +34,18 @@ public class Message implements Serializable{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NotEmpty(message = "From email address is mandatory")
+	@Email (message = "From email address format is not valid")
 	@Column(name = "email_from")
 	private String emailFrom;	
 	
+	@NotEmpty(message = "To email address is mandatory")
 	@Column(name = "email_to")
 	private String emailTo;
 
 	@Column(name = "email_cc")
 	private String emailCc;
 
-	
 	@Column(name = "email_body")
 	private String emailBody;
 
@@ -52,4 +56,5 @@ public class Message implements Serializable{
 	@Column(name = "update_at")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date updateAt;
+
 }

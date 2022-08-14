@@ -2,6 +2,8 @@ package com.example.emailbox.controller;
 
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import com.example.emailbox.dto.MailBoxDTO;
 import com.example.emailbox.dto.MailDTO;
 import com.example.emailbox.dto.MultipleDeleteDTO;
 import com.example.emailbox.entity.Email;
+import com.example.emailbox.exceptions.EmailStatusException;
 import com.example.emailbox.exceptions.MailServiceException;
 import com.example.emailbox.mappers.EMailMapper;
 import com.example.emailbox.modelo.Message;
@@ -41,8 +44,8 @@ public class EmailController {
 	private OutBoxService outBoxService;
 
 
-	@GetMapping("/mailbox")
-	public ResponseEntity<Set<MailDTO>> listMailBox(@RequestBody MailBoxDTO mailBoxDTO) throws MailServiceException {
+	@GetMapping
+	public ResponseEntity<Set<MailDTO>> listMailBox(@RequestBody @Valid MailBoxDTO mailBoxDTO) throws MailServiceException {
 		Set<Email> mails = null;
 		StatusEnum statusEnum = mailBoxDTO.getEmailStatus();
 		String emailAdress = mailBoxDTO.getEmailAddress();
@@ -62,27 +65,19 @@ public class EmailController {
 	}
 
 
-
-
-	@PutMapping(value = "updateMailMessage/{mailId}")
+	@PutMapping(value = "/updateMailMessage/{mailId}")
 	public ResponseEntity<MailDTO> updateMailMessage(@PathVariable("mailId") Long mailId, @RequestBody MailDTO mailDTO)
 			throws MailServiceException {
-		Message messaUpdated = null;
+
+		Email emailToBeUpdated = null;
 		Email emailUpdated = null;
 
 		try {
 
 			mailDTO.setMailId(mailId);
-			emailUpdated = EMailMapper.convertToEntity(mailDTO);
-			//messaUpdated = messageService.updateMail(EMailMapper.convertToEntity(mailDTO).getMessage());
-			//call message client
-			if (messaUpdated == null) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-			}
-			emailUpdated.setMessage(messaUpdated);
-			
-			//TODO call meesage cliente
-			//emailUpdated.setEmailStatusValue(messaUpdated.getOutBox().getEmailStatusValue());
+			emailToBeUpdated = EMailMapper.convertToEntity(mailDTO);
+
+			emailUpdated = outBoxService.updateOutBoxMessage(emailToBeUpdated);
 
 		} catch (Exception e) {
 			throw new MailServiceException(e, new Object[] { mailId });
@@ -90,8 +85,6 @@ public class EmailController {
 
 		return ResponseEntity.ok(EMailMapper.convertToDTO(emailUpdated));
 	}
-	
-	
 	
 	@PostMapping("/deleteMultiple")
 	public ResponseEntity<Set<MailDTO>> deleteMultipleMail(@RequestBody MultipleDeleteDTO emailsIds) {
@@ -118,5 +111,25 @@ public class EmailController {
 		return ResponseEntity.ok(EMailMapper.convertToDTO(deletedMails));
 	}
 
+	/**
+	 * Set as spall All mails sent from a emailAddress
+	 * 
+	 * @param emailAddress
+	 * @return
+	 * @throws MailServiceException
+	 * @throws EmailStatusException
+	 */
+	@PostMapping(value = "/setAsSpam/{emailAddress}")
+	public ResponseEntity<Set<MailDTO>> setAsSpam(@PathVariable("emailAddress") String emailAddress)
+			throws MailServiceException, EmailStatusException {
+		Set<Email> updatedMails = null;
 
+		updatedMails = outBoxService.updateMailsAsSpam(emailAddress);
+		if (updatedMails == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+
+		return ResponseEntity.ok(EMailMapper.convertToDTO(updatedMails));
+	}
+	
 }

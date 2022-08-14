@@ -16,7 +16,7 @@ public interface OutBoxService {
 	 * Retrieves an {@link OutBox} {@link Email} by Id
 	 * @return
 	 */
-	public Email getOutBoxById(Long mailId);
+	public Email getOutBoxById(Long mailId) throws MailServiceException;
 	
 	/**
 	 * Retrieves a {@link OutBox} {@link Set} by string email address and {@link StatusEnum}
@@ -51,6 +51,16 @@ public interface OutBoxService {
 	 * @throws MailServiceException
 	 */
 	public Email updateMailStatus(Long mailId, StatusEnum status) throws MailServiceException;
+	
+	
+	/**
+	 * Updates {@link OutBox} 
+	 * @param mailsIds
+	 * @return
+	 * @throws MailServiceException
+	 */
+	public Email updateOutBoxMessage(Email email) throws MailServiceException;
+	
 
 	/**
 	 * Delete a {@link Set}  of {@link OutBox}  by id {@link Set}
@@ -66,9 +76,7 @@ public interface OutBoxService {
 	 * @return
 	 * @throws MailServiceException
 	 */
-	public Set<Email> setOutBoxMailsAsSpam(String addressParam) throws MailServiceException;
-	
-	
-//	public Email updateMailMessage(Long mailId, Email email) throws MailServiceException{
+	public Set<Email> updateMailsAsSpam(String addressParam) throws MailServiceException;
+
 	
 }

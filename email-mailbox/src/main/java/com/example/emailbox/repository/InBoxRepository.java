@@ -15,11 +15,18 @@ import com.example.emailbox.modelo.Address;
 public interface InBoxRepository extends JpaRepository<InBox, Long> {
 
 	/**
-	 * Retrieves an {@link Email} {@link InBox} by addressId
+	 * Retrieves an {@link Email} {@link InBox}  {@link Set}  addressId
 	 * @param addrressId
 	 * @return
 	 */
 	public Set<Email> findByIdAddressId(Long addrressId);
+	
+	/**
+	 * Retrieves an {@link Email} {@link InBox} {@link Set} by messageId
+	 * @param addrressId
+	 * @return
+	 */
+	public Set<Email> findByIdMessageId(Long messageId);
 
 	/**
 	 * Retrieves an {@link Email} {@link InBox} by addressId and Status
@@ -43,7 +50,7 @@ public interface InBoxRepository extends JpaRepository<InBox, Long> {
 	 * @return
 	 */
 	@Modifying
-	@Query("UPDATE InBox ibox SET ibox.emailStatusValue = :status WHERE ibox.id.messageId = :messageId")
+	@Query("UPDATE InBox ibox SET ibox.emailStatusValue = :status WHERE ibox.id.messageId = :messageId and ibox.emailStatusValue != 3")
 	public int updateStatus(@Param("messageId") Long messageId, @Param("status") int status);
 
 }

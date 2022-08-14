@@ -4,14 +4,8 @@ package com.example.emailbox.modelo;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,8 +22,11 @@ public class Message implements Serializable{
 
 	private Long id;
 	
+	@NotEmpty(message = "From email address is mandatory")
+	@Email (message = "From email address format is not valid")
 	private String emailFrom;	
 	
+	@NotEmpty(message = "To email address is mandatory")
 	private String emailTo;
 
 	private String emailCc;
