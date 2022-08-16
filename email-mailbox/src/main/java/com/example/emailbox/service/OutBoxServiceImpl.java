@@ -13,11 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.example.emailbox.client.AddressClient;
 import com.example.emailbox.client.MessageClient;
+import com.example.emailbox.dto.MailDTO;
 import com.example.emailbox.entity.Email;
 import com.example.emailbox.entity.OutBox;
 import com.example.emailbox.exceptions.EmailStatusException;
 import com.example.emailbox.exceptions.MailServiceException;
 import com.example.emailbox.exceptions.NoAddressDomainException;
+import com.example.emailbox.mappers.EMailMapper;
 import com.example.emailbox.modelo.Address;
 import com.example.emailbox.modelo.Message;
 import com.example.emailbox.modelo.enums.StatusEnum;
@@ -34,6 +36,7 @@ public class OutBoxServiceImpl implements OutBoxService {
 	private static final String ERROR_DELETE_OUTBOX_MESSAGE = "Error deleting outbox message with ID = %s.";
 	private static final String ERROR_UPDATE_TO_SPAM = "Error updating to spam messages from address = %s.";
 	private static final String ERROR_UPDATE_MESSAGE = "Error updating message with ID = %s.";
+	private static final String ERROR_CREATE_OUTBOX = "Error creatting outbox.";
 
 	
 	Logger logger = LoggerFactory.getLogger(OutBoxServiceImpl.class);
@@ -64,7 +67,7 @@ public class OutBoxServiceImpl implements OutBoxService {
 	 * .lang.String, com.example.emailbox.modelo.enums.StatusEnum)
 	 */
 	@Override
-	public Set<Email> listEmailsFromAddresAndStatus(String stringAddress, StatusEnum status)
+	public Set<Email> listEmailsFromAddressAndStatus(String stringAddress, StatusEnum status)
 			throws MailServiceException {
 		Set<Email> outBoxList = null;
 
@@ -85,7 +88,7 @@ public class OutBoxServiceImpl implements OutBoxService {
 	 * String)
 	 */
 	@Override
-	public Set<Email> listEmailsFromAddres(String stringAddress) throws MailServiceException {
+	public Set<Email> listEmailsFromAddress(String stringAddress) throws MailServiceException {
 		Set<Email> outBoxList = null;
 		Address address = getValidatedAddress(stringAddress);
 		if (address != null) {
@@ -120,6 +123,32 @@ public class OutBoxServiceImpl implements OutBoxService {
 		return savedEmail;
 	}
 
+	
+	
+	/**
+	 * Save a set of Mails(Outbox)
+	 * 
+	 * @param mailDTOSet
+	 * @return
+	 */
+	public Set<Email> saveEmailBoxSet(Set<Email> emailSet) throws MailServiceException{
+		Set<Email> savedMailSet = new HashSet<>();
+		emailSet.forEach(mail -> {
+			try {
+				Email savedMail = null;
+				savedMail = createOutBox(mail);
+				if (null != savedMail) {
+					savedMailSet.add(savedMail);
+				}
+			} catch (Exception e) {
+				logger.warn("Mail will not be created: " + mail.toString());
+				throw new RuntimeException(e);
+			}
+		});
+
+		return savedMailSet;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

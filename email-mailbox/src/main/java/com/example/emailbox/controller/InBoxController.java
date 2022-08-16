@@ -108,26 +108,6 @@ public class InBoxController {
 
 	
 	/**
-	 * Create a mail from a {@link MailDTO}
-	 * 
-	 * @param mailDTO
-	 * @return
-	 */
-	@PostMapping
-	public ResponseEntity<MailDTO> createAndSendMail(@RequestBody @Valid MailDTO mailDTO) throws MailServiceException{
-		Email savedMail = null;
-		
-
-		if (mailDTO != null) {
-			Email mail = EMailMapper.convertToEntity(mailDTO);
-			savedMail = outBoxService.createOutBox(mail);
-			savedMail = inBoxService.sendMail(savedMail.getMessage().getId());
-		}
-		
-		return ResponseEntity.status(HttpStatus.CREATED).body(EMailMapper.convertToDTO(savedMail));
-	}
-	
-	/**
 	 * Send a mail by Id
 	 * @param mailId
 	 * @return
@@ -147,23 +127,23 @@ public class InBoxController {
 		return ResponseEntity.ok(EMailMapper.convertToDTO(mailSended));
 	}
 	
-	/**
-	 * Update sent OutBox and InBox messages as SPAM by string email address
-	 * @param emailAddress
-	 * @return
-	 * @throws MailServiceException
-	 * @throws EmailStatusException
-	 */
-	@PostMapping(value = "/setAsSpam/{emailAddress}")
-	public ResponseEntity<Set<MailDTO>> setAsSpam(@PathVariable("emailAddress") String emailAddress)
-			throws MailServiceException, EmailStatusException {
-		Set<Email> updatedMails = null;
-
-		updatedMails = outBoxService.updateMailsAsSpam(emailAddress);
-		if (updatedMails == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
-
-		return ResponseEntity.ok(EMailMapper.convertToDTO(updatedMails));
-	}
+//	/**
+//	 * Update sent OutBox and InBox messages as SPAM by string email address
+//	 * @param emailAddress
+//	 * @return
+//	 * @throws MailServiceException
+//	 * @throws EmailStatusException
+//	 */
+//	@PostMapping(value = "/setAsSpam/{emailAddress}")
+//	public ResponseEntity<Set<MailDTO>> setAsSpam(@PathVariable("emailAddress") String emailAddress)
+//			throws MailServiceException, EmailStatusException {
+//		Set<Email> updatedMails = null;
+//
+//		updatedMails = outBoxService.updateMailsAsSpam(emailAddress);
+//		if (updatedMails == null) {
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//		}
+//
+//		return ResponseEntity.ok(EMailMapper.convertToDTO(updatedMails));
+//	}
 }

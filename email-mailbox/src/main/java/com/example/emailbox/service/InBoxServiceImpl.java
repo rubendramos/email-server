@@ -59,7 +59,7 @@ public class InBoxServiceImpl implements InBoxService {
 	 * lang.String, com.example.emailbox.modelo.enums.StatusEnum)
 	 */
 	@Override
-	public Set<Email> listEmailsFromAddresAndStatus(String stringAddress, StatusEnum status)
+	public Set<Email> listEmailsFromAddressAndStatus(String stringAddress, StatusEnum status)
 			throws MailServiceException {
 
 		Set<Email> inBoxList = null;
@@ -79,7 +79,7 @@ public class InBoxServiceImpl implements InBoxService {
 	 * String)
 	 */
 	@Override
-	public Set<Email> listEmailsFromAddres(String stringAddress) throws MailServiceException {
+	public Set<Email> listEmailsFromAddress(String stringAddress) throws MailServiceException {
 		Set<Email> inBoxList = null;
 		Address address = getValidatedAddress(stringAddress);
 		if (address != null) {
@@ -121,34 +121,15 @@ public class InBoxServiceImpl implements InBoxService {
 	@Override
 	public Email sendMail(Long mailId) throws MailServiceException, EmailStatusException {
 		OutBox outBoxMail = null;
-		Message message = null;
-		Address address = null;
 		List<InBox> recipients = new ArrayList<>();
 
 		try {
-
-			outBoxMail = outBoxRepository.findById(mailId).get();
-
-			message = messageClient.getMessageById(outBoxMail.getId()).getBody();
-			address = addressClient.getAddressById(outBoxMail.getAddressId()).getBody();
-			outBoxMail.setMessage(message);
-			outBoxMail.setAddress(address);
-
-			Set<String> addressStringToSet = EmailServerUtils.getAddressSet(message.getEmailTo());
-			Set<String> addressStringCcSet = EmailServerUtils.getAddressSet(message.getEmailCc());
-
-			Set<Address> validAddressTo = validateAddressSet(addressStringToSet);
-			Set<Address> validAddressCc = validateAddressSet(addressStringCcSet);
-
-			Set<InBox> inBoxTo = generateInboxFromAddress(outBoxMail.getMessage(), validAddressTo, AddressTypeEnum.TO,
-					StatusEnum.ENVIADO);
-			Set<InBox> inBoxCC = generateInboxFromAddress(outBoxMail.getMessage(), validAddressCc, AddressTypeEnum.CC,
-					StatusEnum.ENVIADO);
-
-			recipients.addAll(inBoxTo);
-			recipients.addAll(inBoxCC);
+			
+			outBoxMail = getOutBoxById(mailId);
 
 			if (outBoxMail.getEmailStatus() == StatusEnum.BORRADOR) {
+
+				recipients = generateRecipientsFromOutBox(outBoxMail);
 				outBoxMail.setEmailStatusValue(StatusEnum.ENVIADO.getStatusId());
 
 				inBoxRepository.saveAll(recipients);
@@ -168,6 +149,7 @@ public class InBoxServiceImpl implements InBoxService {
 		return outBoxMail;
 
 	}
+	
 
 	/*
 	 * (non-Javadoc)
@@ -211,44 +193,6 @@ public class InBoxServiceImpl implements InBoxService {
 		return deletedMails;
 	}
 
-//	/*
-//	 * (non-Javadoc)
-//	 * 
-//	 * @see com.example.emailbox.service.InBoxService#setInBoxMailsAsSpam(java.lang.
-//	 * String)
-//	 */
-//	@Transactional
-//	@Override
-//	public Set<Email> updateMailsAsSpam(String stringAddress) throws MailServiceException {
-//		Set<Email> sendedMailsToBeUPdated = null;
-//
-//		try {
-//
-//			Address address = getValidatedAddress(stringAddress);
-//			if (address != null) {
-//				sendedMailsToBeUPdated = outBoxRepository.findByAddressIdAndEmailStatusValue(address.getId(),
-//						StatusEnum.ENVIADO.getStatusId());
-//				sendedMailsToBeUPdated.forEach(outbox -> {
-//					Long messageId = null;
-//					try {
-//						messageId = ((OutBox)outbox).getId();
-//						outBoxRepository.updateStatus(messageId, StatusEnum.SPAN.getStatusId());
-//						inBoxRepository.updateStatus(messageId, StatusEnum.SPAN.getStatusId());
-//						
-//					} catch (Exception e) {
-//						logger.error(String.format(ERROR_UPDATE_MESSAGE, messageId));
-//					}
-//				});
-//			}
-//
-//		} catch (Exception e) {
-//			logger.error(String.format(ERROR_UPDATE_TO_SPAM, stringAddress));
-//			throw new MailServiceException(e, new Object[] { String.format(ERROR_UPDATE_TO_SPAM, stringAddress) });
-//		}
-//
-//		return sendedMailsToBeUPdated;
-//	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -284,6 +228,20 @@ public class InBoxServiceImpl implements InBoxService {
 	public Email getInBoxMailById(EmailAddressKey emailAddresKey) throws MailServiceException {
 		return addMessageAndAddres(inBoxRepository.findById(emailAddresKey));
 	}
+	
+	
+	/**
+	 * Load a full OuBox Eamil with message and addess
+	 * @param messageId
+	 * @return
+	 */
+	private OutBox getOutBoxById(Long messageId) {
+		OutBox outBoxMail = outBoxRepository.findById(messageId).get();
+		outBoxMail.setMessage(messageClient.getMessageById(outBoxMail.getId()).getBody());
+		outBoxMail.setAddress(addressClient.getAddressById(outBoxMail.getAddressId()).getBody());
+		return outBoxMail;
+	}
+	
 
 	/**
 	 * Add Message and Address to Inbox {@link Email} {@link Set}
@@ -328,13 +286,46 @@ public class InBoxServiceImpl implements InBoxService {
 		return email;
 	}
 
+	
+	
+	/**
+	 * Generate recipients {@link InBox} from To and CC list of addresses
+	 * @param outBoxMail
+	 * @return
+	 */
+	private List<InBox> generateRecipientsFromOutBox(OutBox outBoxMail) {
+		List<InBox> recipients = new ArrayList<>();
+		Message message = outBoxMail.getMessage();
+
+		Set<InBox> inBoxTo = generateInboxByAddressType(message, AddressTypeEnum.TO);
+		Set<InBox> inBoxCC = generateInboxByAddressType(message, AddressTypeEnum.CC);
+
+		recipients.addAll(inBoxTo);
+		recipients.addAll(inBoxCC);
+		
+		return recipients;
+	}
+	
+	/**
+	 * Generate Inbox by AddressTypeEnum
+	 * @param message
+	 * @param addressTypeEnum
+	 * @return
+	 */
+	private Set<InBox> generateInboxByAddressType(Message message, AddressTypeEnum addressTypeEnum){
+		Set<String> addressStringToSet = EmailServerUtils.getAddressSet(message.getEmailTo());
+		Set<Address> validAddress = validatedAddressSet(addressStringToSet);
+		return generateInboxFromAddress(message, validAddress, addressTypeEnum, StatusEnum.ENVIADO);
+	}
+	
+	
 	/**
 	 * Add to a set all valid Addess
 	 * 
 	 * @param stringAddressSet
 	 * @return
 	 */
-	private Set<Address> validateAddressSet(Set<String> stringAddressSet) {
+	private Set<Address> validatedAddressSet(Set<String> stringAddressSet) {
 		Set<Address> validAddress = new HashSet<>();
 		stringAddressSet.forEach(stringAddress -> {
 			Address address = getAddress(stringAddress);
@@ -356,12 +347,12 @@ public class InBoxServiceImpl implements InBoxService {
 	 * @param status
 	 * @return
 	 */
-	private Set<InBox> generateInboxFromAddress(Message mail, Set<Address> addressSet, AddressTypeEnum addressTypeEnum,
+	private Set<InBox> generateInboxFromAddress(Message message, Set<Address> addressSet, AddressTypeEnum addressTypeEnum,
 			StatusEnum status) {
 		Set<InBox> recipients = new HashSet<>();
 		if (addressSet != null && !addressSet.isEmpty()) {
 			addressSet.forEach(address -> {
-				recipients.add(new InBox(mail, address, addressTypeEnum, status));
+				recipients.add(new InBox(message, address, addressTypeEnum, status));
 			});
 		}
 		return recipients;

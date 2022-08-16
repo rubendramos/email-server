@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.example.emailbox.modelo.Address;
 
-@FeignClient(name ="email-address",path="/api/address")
+@FeignClient(name ="email-address",path="/api/address",fallback = AddresssHystrixFallBackFactory.class)
 public interface AddressClient {
 	
 	/**

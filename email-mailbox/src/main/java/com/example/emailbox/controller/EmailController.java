@@ -45,23 +45,44 @@ public class EmailController {
 
 
 	@GetMapping
-	public ResponseEntity<Set<MailDTO>> listMailBox(@RequestBody @Valid MailBoxDTO mailBoxDTO) throws MailServiceException {
+	public ResponseEntity<Set<MailDTO>> searchMailBox(@RequestBody @Valid MailBoxDTO mailBoxDTO) throws MailServiceException {
 		Set<Email> mails = null;
 		StatusEnum statusEnum = mailBoxDTO.getEmailStatus();
 		String emailAdress = mailBoxDTO.getEmailAddress();
 
 		switch (mailBoxDTO.getMailBoxType()) {
 		case INBOX:
-			mails = inBoxService.listEmailsFromAddresAndStatus(emailAdress, statusEnum);
+			mails = inBoxService.listEmailsFromAddressAndStatus(emailAdress, statusEnum);
 			break;
 		case OUTBOX:
-			mails = outBoxService.listEmailsFromAddresAndStatus(emailAdress, statusEnum);
+			mails = outBoxService.listEmailsFromAddressAndStatus(emailAdress, statusEnum);
 		}
 
 		if (!mails.isEmpty()) {
 			return ResponseEntity.ok(EMailMapper.convertToDTO(mails));
 		}
 		return ResponseEntity.noContent().build();
+	}
+	
+	
+	/**
+	 * Create a mail from a {@link MailDTO}
+	 * 
+	 * @param mailDTO
+	 * @return
+	 */
+	@PostMapping
+	public ResponseEntity<MailDTO> createAndSendMail(@RequestBody @Valid MailDTO mailDTO) throws MailServiceException{
+		Email savedMail = null;
+		
+
+		if (mailDTO != null) {
+			Email mail = EMailMapper.convertToEntity(mailDTO);
+			savedMail = outBoxService.createOutBox(mail);
+			savedMail = inBoxService.sendMail(savedMail.getMessage().getId());
+		}
+		
+		return ResponseEntity.status(HttpStatus.CREATED).body(EMailMapper.convertToDTO(savedMail));
 	}
 
 
@@ -112,7 +133,7 @@ public class EmailController {
 	}
 
 	/**
-	 * Set as spall All mails sent from a emailAddress
+	 * Set as spam All mails sent from an @param emailAddress
 	 * 
 	 * @param emailAddress
 	 * @return

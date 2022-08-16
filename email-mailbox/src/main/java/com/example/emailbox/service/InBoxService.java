@@ -17,13 +17,13 @@ public interface InBoxService {
 	 * Retrieves an {@link Email} {@link Set} by string email address and {@link StatusEnum}
 	 * @return
 	 */
-	public Set<Email> listEmailsFromAddresAndStatus(String addresParam, StatusEnum status) throws MailServiceException;
+	public Set<Email> listEmailsFromAddressAndStatus(String addresParam, StatusEnum status) throws MailServiceException;
 	
 	/**
 	 * Retrieves a {@link Email} {@link Set} by string email address
 	 * @return
 	 */
-	public Set<Email> listEmailsFromAddres(String addressParam) throws MailServiceException;
+	public Set<Email> listEmailsFromAddress(String addressParam) throws MailServiceException;
 	
 	/**
 	 * Retrieves a {@link Email}  {@link Set} by mesageId

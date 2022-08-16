@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.emailbox.modelo.Message;
 
-@FeignClient(name = "email-message", path= "/api/message")
+@FeignClient(name = "email-message", path= "/api/message", fallback = MessageHystrixFallBackFactory.class)
 public interface MessageClient {
 
 	

@@ -68,7 +68,7 @@ public class OutBoxController {
 	public ResponseEntity<Set<MailDTO>> listOutBoxMails(@RequestParam String addressParam,
 			@RequestParam int statusParam) throws MailServiceException {
 		StatusEnum statusEnum = StatusEnum.of(statusParam);
-		Set<Email> mails = outBoxService.listEmailsFromAddresAndStatus(addressParam, statusEnum);
+		Set<Email> mails = outBoxService.listEmailsFromAddressAndStatus(addressParam, statusEnum);
 		if (!mails.isEmpty()) {
 			return ResponseEntity.ok(EMailMapper.convertToDTO(mails));
 		}
@@ -82,7 +82,7 @@ public class OutBoxController {
 	 * @return
 	 */
 	@PostMapping
-	public ResponseEntity<MailDTO> createMail(@RequestBody @Valid MailDTO mailDTO) throws MailServiceException {
+	public ResponseEntity<MailDTO> createAnEMail(@RequestBody @Valid MailDTO mailDTO) throws MailServiceException {
 		Email savedMail = null;
 
 		if (mailDTO != null) {
@@ -108,7 +108,9 @@ public class OutBoxController {
 
 			if (multipleMailDTO != null && null != multipleMailDTO.getEmailsDTOs()
 					&& !multipleMailDTO.getEmailsDTOs().isEmpty()) {
-				savedMailSet = saveMailSet(multipleMailDTO.getEmailsDTOs());
+				
+				Set<Email> mailSetToSave = EMailMapper.convertToEntity(multipleMailDTO.getEmailsDTOs());
+				savedMailSet = outBoxService.saveEmailBoxSet(mailSetToSave);
 			}
 
 		} catch (Exception e) {
@@ -170,31 +172,4 @@ public class OutBoxController {
 
 		return ResponseEntity.ok(EMailMapper.convertToDTO(deletedMail));
 	}
-
-
-
-	/**
-	 * Save a set of Mails(Outbox)
-	 * 
-	 * @param mailDTOSet
-	 * @return
-	 */
-	private Set<Email> saveMailSet(Set<MailDTO> mailDTOSet) {
-		Set<Email> savedMailSet = new HashSet<>();
-		mailDTOSet.forEach(mailDTO -> {
-			try {
-				Email savedMail = null;
-				Email mail = EMailMapper.convertToEntity(mailDTO);
-				savedMail = outBoxService.createOutBox(mail);
-				if (null != savedMail) {
-					savedMailSet.add(savedMail);
-				}
-			} catch (Exception e) {
-				logger.warn("No se ha podido guardar el mail con sender: " + mailDTO.toString());
-			}
-		});
-
-		return savedMailSet;
-	}
-
 }

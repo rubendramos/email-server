@@ -22,13 +22,13 @@ public interface OutBoxService {
 	 * Retrieves a {@link OutBox} {@link Set} by string email address and {@link StatusEnum}
 	 * @return
 	 */
-	public Set<Email> listEmailsFromAddresAndStatus(String address, StatusEnum status) throws MailServiceException;
+	public Set<Email> listEmailsFromAddressAndStatus(String address, StatusEnum status) throws MailServiceException;
 	
 	/**
 	 * Retrieves a {@link OutBox} {@link Set} by string email address
 	 * @return
 	 */
-	public Set<Email> listEmailsFromAddres(String address) throws MailServiceException;
+	public Set<Email> listEmailsFromAddress(String address) throws MailServiceException;
 	
 	
 	/**
@@ -38,6 +38,15 @@ public interface OutBoxService {
 	 * @throws MailServiceException
 	 */
 	public Email createOutBox(Email email) throws MailServiceException;
+	
+	
+	/**
+	 * Save a {@link Set} of {@link OutBox}
+	 * @param emailSet
+	 * @return
+	 * @throws MailServiceException
+	 */
+	public Set<Email> saveEmailBoxSet(Set<Email> emailSet) throws MailServiceException;
 	
 	
 	/**Delete {@link OutBox} {@link Email} by Id*/
